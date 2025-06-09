@@ -1,11 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/app/providers.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'app/go_router_navigation.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
