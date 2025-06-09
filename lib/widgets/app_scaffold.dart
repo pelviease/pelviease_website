@@ -31,31 +31,31 @@ class AppScaffold extends StatelessWidget {
                   children: [
                     Image.asset(
                       'assets/icons/logo.png',
-                      height: 72,
+                      height: 56,
                     ),
                     const SizedBox(
                       width: 16,
                     ),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "pelviease",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                          ),
-                        ),
-                        // Text(
-                        //   "VITB",
-                        //   style: TextStyle(
-                        //     fontSize: 32,
-                        //     color: secondaryColor,
-                        //     fontFamily: "Lora",
-                        //   ),
-                        // ),
-                      ],
-                    )
+                    // const Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text(
+                    //       "pelviease",
+                    //       style: TextStyle(
+                    //         fontWeight: FontWeight.bold,
+                    //         fontSize: 30,
+                    //       ),
+                    //     ),
+                    //     // Text(
+                    //     //   "VITB",
+                    //     //   style: TextStyle(
+                    //     //     fontSize: 32,
+                    //     //     color: secondaryColor,
+                    //     //     fontFamily: "Lora",
+                    //     //   ),
+                    //     // ),
+                    //   ],
+                    // )
                   ],
                 ),
               ),
@@ -80,8 +80,11 @@ class AppScaffold extends StatelessWidget {
                     ),
                     onPressed: () {},
                     child: Text(
-                      "Log in",
-                      style: Theme.of(context).textTheme.titleMedium,
+                      "Login",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(color: backgroundColor),
                     ),
                   ),
                 ),

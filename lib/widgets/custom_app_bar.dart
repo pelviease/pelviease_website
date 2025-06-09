@@ -31,22 +31,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
-              onTap: isMobile
-                  ? () {
-                      // Scaffold.of(context).openDrawer();
-                      context.go('/');
-                    }
-                  : () {},
+              onTap: () {
+                // Scaffold.of(context).openDrawer();
+                context.go('/');
+              },
               child: Image.asset(
                 'assets/icons/logo.png',
                 height: 46,
               ),
             ),
-            if (isMobile)
-              Text(
-                "pelviease",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(),
-              ),
+            // if (isMobile)
+            //   Text(
+            //     "pelviease",
+            //     style: Theme.of(context).textTheme.titleLarge?.copyWith(),
+            //   ),
             if (!isMobile)
               Row(
                 children: [
@@ -57,21 +55,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _navItem("Contact", context, "/contact"),
                 ],
               ),
-            Row(
-              children: [
-                ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom().copyWith(
-                      backgroundColor: WidgetStateProperty.all(lightViolet),
-                      foregroundColor: WidgetStateProperty.all(textColor),
-                    ),
-                    child: Text("Signup")),
-                SizedBox(
-                  width: 12,
-                ),
-                ElevatedButton(onPressed: () {}, child: Text("Login"))
-              ],
-            ),
+            if (!isMobile)
+              Row(
+                children: [
+                  ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom().copyWith(
+                        backgroundColor: WidgetStateProperty.all(lightViolet),
+                        foregroundColor: WidgetStateProperty.all(textColor),
+                      ),
+                      child: Text("Signup")),
+                  SizedBox(
+                    width: 12,
+                  ),
+                  ElevatedButton(onPressed: () {}, child: Text("Login"))
+                ],
+              ),
             // if (!isMobile)
             //   (provider.user != null && provider.currentUserModel != null)
             //       ? DropdownButtonHideUnderline(
@@ -164,7 +163,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             //         ),
             if (isMobile)
               IconButton(
-                icon: const Icon(Icons.menu, size: 32, color: Colors.white),
+                icon: const Icon(
+                  Icons.menu,
+                  size: 32,
+                ),
                 onPressed: () {
                   Scaffold.of(context).openDrawer();
                 },
