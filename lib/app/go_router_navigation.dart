@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/screens/about_us/about_us.dart';
+import 'package:pelviease_website/screens/auth/login_screen.dart';
+import 'package:pelviease_website/screens/auth/signup_screen.dart';
 import 'package:pelviease_website/screens/blogs/blogs_screen.dart';
 import 'package:pelviease_website/screens/contact/contact_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
@@ -19,6 +21,20 @@ final GoRouter appRouter = GoRouter(
     return const ErrorPage404();
   },
   routes: [
+    ShellRoute(builder: (context, state, child) => child, routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) {
+          return const LoginScreen();
+        },
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) {
+          return const SignupScreen();
+        },
+      ),
+    ]),
     ShellRoute(
       builder: (context, state, child) {
         return AppScaffold(child: child);

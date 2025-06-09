@@ -4,7 +4,8 @@ import 'package:pelviease_website/const/theme.dart';
 // import 'package:provider/provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final bool isAuth;
+  const CustomAppBar({super.key, this.isAuth = false});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
+            InkWell(
               onTap: () {
                 // Scaffold.of(context).openDrawer();
                 context.go('/');
@@ -45,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             //     "pelviease",
             //     style: Theme.of(context).textTheme.titleLarge?.copyWith(),
             //   ),
-            if (!isMobile)
+            if (!isMobile && !isAuth)
               Row(
                 children: [
                   _navItem("Home", context, "/"),
@@ -55,11 +56,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _navItem("Contact", context, "/contact"),
                 ],
               ),
-            if (!isMobile)
+            if (!isMobile && !isAuth)
               Row(
                 children: [
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.go("/signup");
+                      },
                       style: ElevatedButton.styleFrom().copyWith(
                         backgroundColor: WidgetStateProperty.all(lightViolet),
                         foregroundColor: WidgetStateProperty.all(textColor),
@@ -68,7 +71,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   SizedBox(
                     width: 12,
                   ),
-                  ElevatedButton(onPressed: () {}, child: Text("Login"))
+                  ElevatedButton(
+                      onPressed: () {
+                        context.go("/login");
+                      },
+                      style: ElevatedButton.styleFrom().copyWith(
+                        backgroundColor: WidgetStateProperty.all(buttonColor),
+                        foregroundColor: WidgetStateProperty.all(Colors.white),
+                      ),
+                      child: Text("Login"))
                 ],
               ),
             // if (!isMobile)
