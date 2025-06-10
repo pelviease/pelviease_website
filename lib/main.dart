@@ -4,7 +4,6 @@ import 'package:pelviease_website/app/providers.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/firebase_options.dart';
 import 'package:provider/provider.dart';
-
 import 'app/go_router_navigation.dart';
 
 void main() async {
@@ -12,6 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 

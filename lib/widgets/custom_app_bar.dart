@@ -59,21 +59,25 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (!isMobile && !isAuth)
               Row(
                 children: [
+                  // ElevatedButton(
+                  //     onPressed: () {
+                  //       // context.go("/signup");
+
+                  //       context.go('/auth?mode=signup');
+                  //     },
+                  //     style: ElevatedButton.styleFrom().copyWith(
+                  //       backgroundColor: WidgetStateProperty.all(lightViolet),
+                  //       foregroundColor: WidgetStateProperty.all(textColor),
+                  //     ),
+                  //     child: Text("Signup")),
+                  // SizedBox(
+                  //   width: 12,
+                  // ),
                   ElevatedButton(
                       onPressed: () {
-                        context.go("/signup");
-                      },
-                      style: ElevatedButton.styleFrom().copyWith(
-                        backgroundColor: WidgetStateProperty.all(lightViolet),
-                        foregroundColor: WidgetStateProperty.all(textColor),
-                      ),
-                      child: Text("Signup")),
-                  SizedBox(
-                    width: 12,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        context.go("/login");
+                        // Navigator.of(context).pop();
+
+                        context.goNamed('authScreen');
                       },
                       style: ElevatedButton.styleFrom().copyWith(
                         backgroundColor: WidgetStateProperty.all(buttonColor),

@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/screens/auth/widgets/build_text_field.dart';
 import 'package:pelviease_website/widgets/custom_app_bar.dart';
+import 'package:provider/provider.dart';
 
-import 'widgets/build_text_field.dart';
-
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class AuthScreen extends StatefulWidget {
+  final bool isLogin;
+  const AuthScreen({super.key, this.isLogin = true});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLogin = true;
+  bool _isDoctor = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLogin = widget.isLogin;
+  }
 
   @override
   void dispose() {
@@ -24,6 +33,26 @@ class _SignupScreenState extends State<SignupScreen> {
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _toggleAuthMode() {
+    setState(() {
+      _isLogin = !_isLogin;
+      // Clear form when switching modes
+      _formKey.currentState?.reset();
+      _emailController.clear();
+      _passwordController.clear();
+      _nameController.clear();
+    });
+
+    // Update the URL to reflect the current mode
+    // if (_isLogin) {
+    //   context.pop();
+    //   context.go('/auth/?mode=login');
+    // } else {
+    //   context.pop();
+    //   context.go('/auth/?mode=signup');
+    // }
   }
 
   @override
@@ -45,7 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 return Container(
                   constraints: BoxConstraints(maxWidth: maxWidth),
                   margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  child: _buildLoginCard(isDesktop),
+                  child: _buildAuthCard(isDesktop),
                 );
               },
             ),
@@ -55,7 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildLoginCard(bool isDesktop) {
+  Widget _buildAuthCard(bool isDesktop) {
     return Container(
       padding: const EdgeInsets.all(32),
       margin: EdgeInsets.symmetric(
@@ -83,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
           children: [
             // Title
             Text(
-              'SIGNUP',
+              _isLogin ? 'LOGIN' : 'SIGNUP',
               style: TextStyle(
                 fontSize: isDesktop ? 32 : 28,
                 fontWeight: FontWeight.bold,
@@ -94,19 +123,22 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
 
             SizedBox(height: isDesktop ? 24 : 18),
-            // Name Field
-            BuildTextField(
-              controller: _nameController,
-              hintText: 'Name',
-              icon: Icons.person_outline,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
+
+            // Name Field - Only show for signup
+            if (!_isLogin) ...[
+              BuildTextField(
+                controller: _nameController,
+                hintText: 'Name',
+                icon: Icons.person_outline,
+                validator: (value) {
+                  if (!_isLogin && (value == null || value.isEmpty)) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // Email Field
             BuildTextField(
@@ -137,18 +169,46 @@ class _SignupScreenState extends State<SignupScreen> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your password';
                 }
-                if (value.length < 6) {
+                if (!_isLogin && value.length < 6) {
                   return 'Password must be at least 6 characters';
                 }
                 return null;
               },
             ),
+            if (!_isLogin) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: _isDoctor,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isDoctor = value ?? false;
+                      });
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    side: BorderSide(color: Colors.grey),
+                  ),
+                  SizedBox(width: 8), // Space between checkbox and text
+                  Text(
+                    'Mark me as a Doctor',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ],
 
             SizedBox(height: isDesktop ? 24 : 18),
 
-            // Login Button
+            // Auth Button
             ElevatedButton(
-              onPressed: _handleSignup,
+              onPressed: _handleAuth,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF543855),
                 foregroundColor: Colors.white,
@@ -161,7 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 elevation: 2,
               ),
               child: Text(
-                'Create',
+                _isLogin ? 'Login' : 'Create Account',
                 style: TextStyle(
                   fontSize: isDesktop ? 18 : 16,
                   fontWeight: FontWeight.w600,
@@ -172,26 +232,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
             SizedBox(height: isDesktop ? 24 : 18),
 
-            // Create Account Link
+            // Toggle Auth Mode Link
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Already have an account? ",
+                  _isLogin
+                      ? "Don't have an account? "
+                      : "Already have an account? ",
                   style: TextStyle(
                     color: const Color(0xFF1F1F1F).withOpacity(0.6),
                     fontSize: isDesktop ? 16 : 14,
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    // context.go('/login');
-                    context.pop();
-                    context.go('/auth?mode=login');
-                    // GoRouter.of(context).replace('/login');
-                  },
+                  onTap: _toggleAuthMode,
                   child: Text(
-                    'Login',
+                    _isLogin ? 'Sign Up' : 'Login',
                     style: TextStyle(
                       color: const Color(0xFF543855),
                       fontSize: isDesktop ? 16 : 14,
@@ -207,15 +264,82 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void _handleSignup() {
+  void _handleAuth() {
     if (_formKey.currentState!.validate()) {
-      // Handle login logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('signup functionality would be implemented here'),
-          backgroundColor: Color(0xFF543855),
-        ),
-      );
+      if (_isLogin) {
+        _handleLogin();
+      } else {
+        _handleSignup();
+      }
     }
+  }
+
+  void _handleLogin() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider
+        .login(_emailController.text, _passwordController.text)
+        .then((_) {
+      if (authProvider.isAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Login successful! Welcome ${authProvider.user!.name}'),
+            backgroundColor: Color(0xFF543855),
+          ),
+        );
+        if (mounted) {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Login failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+  }
+
+  void _handleSignup() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider
+        .signup(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+      _isDoctor,
+    )
+        .then((_) {
+      if (authProvider.isAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Signup successful! Welcome ${authProvider.user!.name}'),
+            backgroundColor: Color(0xFF543855),
+          ),
+        );
+        // Navigate to home screen
+        // context.go('/home');
+        if (mounted) {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Signup failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
   }
 }

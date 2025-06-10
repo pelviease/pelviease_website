@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/screens/about_us/about_us.dart';
-import 'package:pelviease_website/screens/auth/login_screen.dart';
-import 'package:pelviease_website/screens/auth/signup_screen.dart';
+import 'package:pelviease_website/screens/auth/auth_screen.dart';
 import 'package:pelviease_website/screens/blogs/blogs_screen.dart';
 import 'package:pelviease_website/screens/contact/contact_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
 import 'package:pelviease_website/screens/products/products_screen.dart';
 import 'package:pelviease_website/widgets/app_scaffold.dart';
+import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 
 import 'error_page.dart';
@@ -21,20 +22,39 @@ final GoRouter appRouter = GoRouter(
     return const ErrorPage404();
   },
   routes: [
-    ShellRoute(builder: (context, state, child) => child, routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) {
-          return const LoginScreen();
-        },
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) {
-          return const SignupScreen();
-        },
-      ),
-    ]),
+    // GoRoute(
+    //   path: '/login',
+    //   builder: (context, state) {
+    //     return const LoginScreen();
+    //   },
+    // ),
+    // GoRoute(
+    //   path: '/signup',
+    //   builder: (context, state) {
+    //     return const SignupScreen();
+    //   },
+    // ),
+    GoRoute(
+      path: "/authentication",
+      name: 'authScreen',
+      redirect: (BuildContext context, GoRouterState state) async {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+        if (authProvider.user == null) {
+          await authProvider.checkCurrentUser();
+        }
+
+        final bool isLoggedIn = authProvider.isAuthenticated;
+
+        if (isLoggedIn) {
+          return '/';
+        }
+        return null;
+      },
+      builder: (context, state) {
+        return AuthScreen(isLogin: true);
+      },
+    ),
     ShellRoute(
       builder: (context, state, child) {
         return AppScaffold(child: child);

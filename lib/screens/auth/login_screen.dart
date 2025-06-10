@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/widgets/custom_app_bar.dart';
-
 import 'widgets/build_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -96,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
             BuildTextField(
               controller: _emailController,
               hintText: 'Email',
-              icon: Icons.person_outline,
+              icon: Icons.email_outlined,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
@@ -169,7 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    context.pushReplacement('/signup');
+                    // context.go('/signup');
+                    context.pop();
+                    context.go('/auth?mode=signup');
+                    // GoRouter.of(context).replace('/signup');
+                    // html.window.history.replaceState(null, '', '/signup');
                   },
                   child: Text(
                     'Create one',
