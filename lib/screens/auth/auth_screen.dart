@@ -149,10 +149,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value)) {
-                  return 'Please enter a valid email';
+                if (!value.contains('@')) {
+                  return 'Enter a valid email';
                 }
+
                 return null;
               },
             ),
@@ -207,28 +207,39 @@ class _AuthScreenState extends State<AuthScreen> {
             SizedBox(height: isDesktop ? 24 : 18),
 
             // Auth Button
-            ElevatedButton(
-              onPressed: _handleAuth,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF543855),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(
-                  vertical: isDesktop ? 18 : 16,
+            Consumer<AuthProvider>(builder: (context, provider, _) {
+              return ElevatedButton(
+                onPressed: _handleAuth,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF543855),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    vertical: isDesktop ? 18 : 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 2,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                elevation: 2,
-              ),
-              child: Text(
-                _isLogin ? 'Login' : 'Create Account',
-                style: TextStyle(
-                  fontSize: isDesktop ? 18 : 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
+                child: provider.isLoading
+                    ? SizedBox(
+                        height: isDesktop ? 18 : 16,
+                        width: isDesktop ? 18 : 16,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        _isLogin ? 'Login' : 'Create Account',
+                        style: TextStyle(
+                          fontSize: isDesktop ? 18 : 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+              );
+            }),
 
             SizedBox(height: isDesktop ? 24 : 18),
 
