@@ -93,9 +93,7 @@ class AppScaffold extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-          child: child),
+      body: child,
     );
   }
 
