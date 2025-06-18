@@ -11,6 +11,7 @@ import 'package:pelviease_website/widgets/app_scaffold.dart';
 import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 
+import '../screens/product_details/product_details.dart';
 import 'error_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -71,6 +72,16 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/products',
           builder: (context, state) => const ProductsScreen(),
+          routes: [
+            GoRoute(
+              path: ':productId',
+              name: 'productDetails',
+              builder: (context, state) {
+                final productId = state.pathParameters['productId'];
+                return ProductDetailsScreen(productId: productId);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '/blogs',
