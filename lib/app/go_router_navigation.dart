@@ -41,15 +41,18 @@ final GoRouter appRouter = GoRouter(
       redirect: (BuildContext context, GoRouterState state) async {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-        if (authProvider.user == null) {
-          await authProvider.checkCurrentUser();
-        }
-
-        final bool isLoggedIn = authProvider.isAuthenticated;
-
-        if (isLoggedIn) {
+        // if (authProvider.user == null) {
+        //   await authProvider.checkCurrentUser();
+        // }
+        if (authProvider.isAuthenticated) {
           return '/';
         }
+
+        // final bool isLoggedIn = authProvider.isAuthenticated;
+
+        // if (isLoggedIn) {
+        //   return '/';
+        // }
         return null;
       },
       builder: (context, state) {

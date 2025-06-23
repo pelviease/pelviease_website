@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,6 +10,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false).checkCurrentUser();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
