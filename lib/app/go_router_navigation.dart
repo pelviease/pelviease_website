@@ -4,6 +4,7 @@ import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/screens/about_us/about_us.dart';
 import 'package:pelviease_website/screens/auth/auth_screen.dart';
 import 'package:pelviease_website/screens/blogs/blogs_screen.dart';
+import 'package:pelviease_website/screens/cart/cart_screen.dart';
 import 'package:pelviease_website/screens/contact/contact_screen.dart';
 import 'package:pelviease_website/screens/doctors/doctors_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
@@ -99,6 +100,11 @@ final GoRouter appRouter = GoRouter(
           path: '/contact',
           builder: (context, state) => const ContactScreen(),
         ),
+        GoRoute(
+            path: "/cart",
+            builder: (context, state) {
+              return const CartScreen();
+            }),
         // GoRoute(
         //     path: '/events',
         //     builder: (context, state) => const EventsScreen(),

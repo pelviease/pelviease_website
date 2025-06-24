@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pelviease_website/backend/models/product_model.dart';
 import 'package:pelviease_website/const/theme.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -264,6 +265,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Widget _buildProductDetails() {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFFEBE7E7),
@@ -312,14 +314,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
           SizedBox(height: 12),
 
-          // Product code
-          Text(
-            'Code: XXXXX',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
+          if (dummyProducts[0].isCertified)
+            Wrap(
+              alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Icon(
+                  Icons.verified,
+                  color: Colors.green.shade600,
+                  size: isMobile ? 16 : 18,
+                ),
+                SizedBox(width: isMobile ? 6 : 8),
+                Text(
+                  'CDSCO Certified',
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : 16,
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-          ),
           SizedBox(height: 20),
 
           // Price
