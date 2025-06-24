@@ -16,7 +16,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     bool isMobile = MediaQuery.of(context).size.width < 720;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      padding: isMobile
+          ? EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+          : EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       decoration: BoxDecoration(
         color: backgroundColor,
         boxShadow: [
@@ -53,6 +55,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _navItem("About Us", context, "/about"),
                   _navItem("Products", context, "/products"),
                   _navItem("Blogs", context, "/blogs"),
+                  _navItem("Doctors", context, "/doctors"),
                   _navItem("Contact", context, "/contact"),
                 ],
               ),

@@ -5,6 +5,7 @@ import 'package:pelviease_website/screens/about_us/about_us.dart';
 import 'package:pelviease_website/screens/auth/auth_screen.dart';
 import 'package:pelviease_website/screens/blogs/blogs_screen.dart';
 import 'package:pelviease_website/screens/contact/contact_screen.dart';
+import 'package:pelviease_website/screens/doctors/doctors_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
 import 'package:pelviease_website/screens/products/products_screen.dart';
 import 'package:pelviease_website/widgets/app_scaffold.dart';
@@ -89,6 +90,10 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/blogs',
           builder: (context, state) => const BlogsScreen(),
+        ),
+        GoRoute(
+          path: '/doctors',
+          builder: (context, state) => const DoctorsScreen(),
         ),
         GoRoute(
           path: '/contact',

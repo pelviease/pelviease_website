@@ -64,6 +64,7 @@ class AppScaffold extends StatelessWidget {
               _buildDrawerNavItem("About Us", context, "/about"),
               _buildDrawerNavItem("Products", context, "/products"),
               _buildDrawerNavItem("Blogs", context, "/blogs"),
+              _buildDrawerNavItem("Doctors", context, "/doctors"),
               _buildDrawerNavItem("Contact", context, "/contact"),
               const SizedBox(height: 20),
               Padding(
