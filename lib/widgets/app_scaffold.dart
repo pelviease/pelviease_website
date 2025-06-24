@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 
 import 'custom_app_bar.dart';
@@ -15,10 +17,12 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final provider = Provider.of<AuthProvider>(context);
+    final provider = Provider.of<AuthProvider>(context);
     // final currentuser = provider.user;
     return Scaffold(
-      appBar: const CustomAppBar(),
+      appBar: CustomAppBar(
+        isAuthenticated: provider.isAuthenticated,
+      ),
       drawer: Drawer(
         backgroundColor: backgroundColor,
         child: SafeArea(
