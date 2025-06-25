@@ -24,101 +24,119 @@ class ContactScreen extends StatelessWidget {
   }
 
   Widget _buildMobileLayout(BuildContext context, Size size) {
-    return Column(
+    return Stack(
       children: [
-        // Contact Us Box
         Container(
-          width: size.width * 0.9,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: const Color(0xFF483149),
-            borderRadius: BorderRadius.circular(42),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Contact Us',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  const Icon(Icons.phone, color: Colors.white, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '+91 91826 64777',
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.email, color: Colors.white, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'techarinoinnovpvtltd@gmail.com',
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.location_pin, color: Colors.white, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'H.NO. 7-123/45/2, 2nd Floor, B.K. Gutta, Sanjeev Reddy Nagar, Hyderabad-500038, Telangana',
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 120,
-                child: Image.asset(
-                  'assets/images/contactus.png',
-                  height: 80,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 80,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.image, color: Colors.white),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Reach Out Anytime Form
-        Container(
-          width: size.width * 0.9,
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: lightcyclamen,
             borderRadius: BorderRadius.circular(42),
           ),
-          child: const ContactForm(),
+          width: size.width,
+          height: size.height * 1.3,
+        ),
+        // Contact Us Box
+        Positioned(
+          left: size.width * 0.05,
+          top: 16,
+          child: Container(
+            width: size.width * 0.7,
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: const Color(0xFF483149),
+              borderRadius: BorderRadius.circular(42),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'Contact Us',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Icon(Icons.phone, color: Colors.white, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '+91 91826 64777',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(Icons.email, color: Colors.white, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'techarinoinnovpvtltd@gmail.com',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on,
+                        color: Colors.white, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'H.NO. 7-1-302/45/4, 5th Floor B.K. Gutta, Sanjeev Reddy Nagar, Ameerpet, Hyderabad-500038, Telangana',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 120,
+                  child: Image.asset(
+                    'assets/images/contactus.png',
+                    height: 80,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.image, color: Colors.white),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          left: size.width * 0.05,
+          top: size.height * 0.6,
+          child: Container(
+            width: size.width,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: lightcyclamen,
+              borderRadius: BorderRadius.circular(42),
+            ),
+            child: const ContactForm(),
+          ),
         ),
       ],
     );
@@ -297,7 +315,7 @@ class _ContactFormState extends State<ContactForm> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(isMobile ? 1 : 20),
         child: Form(
           key: _formKey,
           child: Column(
