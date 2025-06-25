@@ -16,6 +16,9 @@ const Color textColor = Color(0xFF1F1F1F);
 const Color cyclamen = Color(0xFFF87EA0);
 const Color lightcyclamen = Color(0xFFFCBECF);
 const Color lightViolet = Color(0xFFFFF2FF);
+const Color productTextColor = Color(0xFF543855);
+// #FEF2FF
+const Color lightViolet2 = Color(0xFFFEF2FF);
 ThemeData buildAppTheme() {
   return ThemeData(
     fontFamily: "Commissioner",

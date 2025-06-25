@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ErrorPage404 extends StatelessWidget {
   const ErrorPage404({super.key});
@@ -22,7 +23,7 @@ class ErrorPage404 extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                context.go('/');
               },
               child: const Text('Go Back Home'),
             ),

@@ -10,6 +10,8 @@ import 'package:pelviease_website/screens/home/widgets/products_hightlight_secti
 import 'package:pelviease_website/screens/home/widgets/testimonials_section.dart';
 import 'package:pelviease_website/screens/home/widgets/watch_our_content_section.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,6 +52,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false).checkCurrentUser();
+    });
   }
 
   @override
