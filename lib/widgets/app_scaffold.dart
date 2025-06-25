@@ -26,7 +26,7 @@ class AppScaffold extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 0),
                 child: Row(
                   children: [
                     Image.asset(
@@ -94,7 +94,9 @@ class AppScaffold extends StatelessWidget {
         ),
       ),
       body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          padding: MediaQuery.of(context).size.width > 400 
+          ? const EdgeInsets.symmetric(horizontal: 32, vertical: 12)
+          : const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: child),
     );
   }

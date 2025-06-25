@@ -30,6 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             InkWell(
               onTap: () {
@@ -37,8 +38,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 context.go('/');
               },
               child: Image.asset(
-                'assets/icons/logo.png',
-                height: 46,
+                'assets/logo_with_tm.png',
+                height: 24,
               ),
             ),
             // if (isMobile)
@@ -47,14 +48,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             //     style: Theme.of(context).textTheme.titleLarge?.copyWith(),
             //   ),
             if (!isMobile && !isAuth)
-              Row(
-                children: [
-                  _navItem("Home", context, "/"),
-                  _navItem("About Us", context, "/about"),
-                  _navItem("Products", context, "/products"),
-                  _navItem("Blogs", context, "/blogs"),
-                  _navItem("Contact", context, "/contact"),
-                ],
+              Container(
+                height: 46,
+                alignment: Alignment.bottomCenter,
+                child: Row(
+                  children: [
+                    _navItem("Home", context, "/"),
+                    _navItem("About Us", context, "/about"),
+                    _navItem("Products", context, "/products"),
+                    _navItem("Blogs", context, "/blogs"),
+                    _navItem("Contact", context, "/contact"),
+                  ],
+                ),
               ),
             if (!isMobile && !isAuth)
               Row(
@@ -189,24 +194,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _navItem(String title, BuildContext context, String route) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        splashColor: cyclamen.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          context.go(route);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: textColor,
-                  fontSize: 20,
-                  // fontWeight: FontWeight.w500,
-                ),
-          ),
+    final ValueNotifier<bool> isHovered = ValueNotifier(false); 
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => isHovered.value = true,
+        onExit: (_) => isHovered.value = false,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: isHovered,
+          builder: (context, value, child) {
+            return Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: value ? textColor : Colors.grey.shade700,
+                    fontSize: 16,
+                  ),
+            );
+          },
         ),
       ),
     );
