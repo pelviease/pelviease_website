@@ -15,6 +15,22 @@ class CartService {
     return _firestore.collection('users').doc(userId).collection('cart');
   }
 
+  // Add a new cart item
+  Future<void> addCartItem(CartItem item) async {
+    try {
+      await _getCartCollection().doc(item.id).set({
+        'productId': item.productId,
+        'name': item.name,
+        'description': item.description,
+        'price': item.price,
+        'quantity': item.quantity,
+        'image': item.image,
+      });
+    } catch (e) {
+      throw Exception('Failed to add cart item: $e');
+    }
+  }
+
   // Fetch cart items
   Future<List<CartItem>> getCartItems() async {
     try {

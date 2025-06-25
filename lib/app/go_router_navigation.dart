@@ -102,6 +102,7 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
             path: "/cart",
+            name: 'cartScreen',
             builder: (context, state) {
               return const CartScreen();
             }),

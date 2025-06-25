@@ -176,7 +176,7 @@ class ProductsView extends StatelessWidget {
         SizedBox(height: isMobile ? 8 : 12),
 
         // Certification
-        if (product.isCertified)
+        if (product.isCDSCOCertified)
           Wrap(
             alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
@@ -210,7 +210,7 @@ class ProductsView extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '₹ ${product.originalPrice}',
+                        '₹ ${product.basePrice}',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey.shade400,
@@ -219,7 +219,7 @@ class ProductsView extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${product.discountPrice}/-',
+                        '${product.finalPrice}/-',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -287,7 +287,7 @@ class ProductsView extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '₹ ${product.originalPrice}',
+                        '₹ ${product.basePrice}',
                         style: TextStyle(
                           fontSize: isTablet ? 16 : 18,
                           color: Colors.grey.shade400,
@@ -296,7 +296,7 @@ class ProductsView extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${product.discountPrice}/-',
+                        '${product.finalPrice}/-',
                         style: TextStyle(
                           fontSize: isTablet ? 20 : 24,
                           fontWeight: FontWeight.bold,
