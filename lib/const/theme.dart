@@ -10,6 +10,7 @@ class AppColors {
 }
 
 const Color buttonColor = Color(0xFF543855);
+const Color darkViolet = Color(0xFF322132);
 const Color backgroundColor = Color(0xFFFFFFFF);
 const Color textColor = Color(0xFF1F1F1F);
 const Color cyclamen = Color(0xFFF87EA0);
@@ -110,9 +111,9 @@ ThemeData buildAppTheme() {
       headlineSmall:
           TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w600),
       titleLarge:
-          TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w600),
+          TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w700), 
       titleMedium:
-          TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w500),
+          TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w600),
       titleSmall:
           TextStyle(color: AppColors.textColor, fontWeight: FontWeight.w500),
       bodyLarge: TextStyle(color: AppColors.textColor),
