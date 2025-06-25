@@ -22,6 +22,7 @@ class CartService {
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return CartItem(
+          productId: data['productId'] as String,
           id: doc.id,
           name: data['name'] as String,
           description: data['description'] as String,
@@ -39,6 +40,7 @@ class CartService {
   Future<void> updateCartItem(CartItem item) async {
     try {
       await _getCartCollection().doc(item.id).set({
+        'productId': item.productId,
         'name': item.name,
         'description': item.description,
         'price': item.price,

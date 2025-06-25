@@ -44,6 +44,7 @@ class CartProvider with ChangeNotifier {
         _cartItems.removeWhere((item) => item.id == id);
       } else {
         final updatedItem = CartItem(
+          productId: item.productId,
           id: item.id,
           name: item.name,
           description: item.description,
