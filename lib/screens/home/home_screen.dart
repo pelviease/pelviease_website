@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pelviease_website/const/theme.dart';
-import 'package:pelviease_website/screens/blogs/blogs_screen.dart';
+
 import 'package:pelviease_website/screens/home/widgets/blogs_section.dart';
 import 'package:pelviease_website/screens/home/widgets/hero_card_one.dart';
 import 'package:pelviease_website/screens/home/widgets/partners_section.dart';
@@ -21,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   late final PageController controller;
   late final Timer autoScrollTimer;
 
@@ -35,10 +33,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
     controller = PageController(viewportFraction: 1, keepPage: true);
 
     autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      int nextPage = controller.page!.round() + 1;
+      if (!controller.hasClients) return;
+      int nextPage = (controller.page?.round() ?? 0) + 1;
       if (nextPage >= carouselCards.length) nextPage = 0;
       controller.animateToPage(
         nextPage,
@@ -46,20 +46,17 @@ class _HomeScreenState extends State<HomeScreen> {
         curve: Curves.easeInOut,
       );
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false).checkCurrentUser();
+    });
   }
 
   @override
   void dispose() {
+    autoScrollTimer.cancel();
     controller.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AuthProvider>(context, listen: false).checkCurrentUser();
-    });
   }
 
   @override
@@ -80,10 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(
                   children: [
                     PageView.builder(
-                      controller: controller,
-                      itemBuilder: (_, index) {
-                        return carouselCards[index % carouselCards.length];
-                    }),
+                        controller: controller,
+                        itemBuilder: (_, index) {
+                          return carouselCards[index % carouselCards.length];
+                        }),
                     Positioned(
                       bottom: 20,
                       left: screenWidth / 2 - 100,
@@ -91,27 +88,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         controller: controller,
                         count: carouselCards.length,
                         effect: const WormEffect(
-                          dotHeight: 6,
-                          dotWidth: 6,
-                          type: WormType.thinUnderground,
-                          activeDotColor: Colors.white,
-                          dotColor: Colors.white38
-                        ),
+                            dotHeight: 6,
+                            dotWidth: 6,
+                            type: WormType.thinUnderground,
+                            activeDotColor: Colors.white,
+                            dotColor: Colors.white38),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
             ProductHighlightSection(),
-
             WatchOurContentSection(),
-
             BlogsSection(),
-
             TestimonialsSection(),
-
             PartnersSection()
           ],
         ),
