@@ -30,7 +30,8 @@ class AppScaffold extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 0),
                 child: Row(
                   children: [
                     Image.asset(
@@ -73,8 +74,12 @@ class AppScaffold extends StatelessWidget {
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Builder(
-                  builder: (context) => ElevatedButton(
+                child: Builder(builder: (context) {
+                  return
+
+                      // provider.isAuthenticated?
+                      // //
+                      ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       // backgroundColor: secondaryColor,
@@ -83,7 +88,9 @@ class AppScaffold extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      context.goNamed('authScreen');
+                    },
                     child: Text(
                       "Login",
                       style: Theme.of(context)
@@ -91,17 +98,17 @@ class AppScaffold extends StatelessWidget {
                           .titleMedium
                           ?.copyWith(color: backgroundColor),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
             ],
           ),
         ),
       ),
       body: Padding(
-          padding: MediaQuery.of(context).size.width > 400 
-          ? const EdgeInsets.symmetric(horizontal: 32, vertical: 12)
-          : const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: MediaQuery.of(context).size.width > 400
+              ? const EdgeInsets.symmetric(horizontal: 32, vertical: 12)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: child),
     );
   }
