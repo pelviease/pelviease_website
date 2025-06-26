@@ -3,8 +3,7 @@ enum PaymentType {
   creditCard,
   debitCard,
   bankTransfer,
-  upi,
-  all;
+  upi;
 
   @override
   String toString() {
@@ -14,7 +13,6 @@ enum PaymentType {
       PaymentType.debitCard => 'Debit Card',
       PaymentType.bankTransfer => 'Bank Transfer',
       PaymentType.upi => 'UPI',
-      PaymentType.all => 'All',
     };
   }
 
@@ -27,7 +25,6 @@ enum PaymentType {
       'Debit Card' => PaymentType.debitCard,
       'Bank Transfer' => PaymentType.bankTransfer,
       'UPI' => PaymentType.upi,
-      'All' => PaymentType.all,
       _ => PaymentType.cash,
     };
   }

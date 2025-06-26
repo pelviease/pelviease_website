@@ -1,6 +1,7 @@
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/backend/providers/doctor_provider.dart';
+import 'package:pelviease_website/backend/providers/order_item_provider.dart';
 import 'package:pelviease_website/backend/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -13,5 +14,6 @@ class AppProviders {
     ChangeNotifierProvider(create: (_) => DoctorProvider()),
     ChangeNotifierProvider(create: (_) => CartProvider()),
     ChangeNotifierProvider(create: (_) => ProductProvider()),
+    ChangeNotifierProvider(create: (_) => OrderProvider()),
   ];
 }
