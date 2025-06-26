@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -77,15 +78,44 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (!isMobile && !isAuth && isAuthenticated)
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.shopping_cart_outlined,
-                      size: 28,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      context.go('/cart');
-                    },
+                  Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 28,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          context.go('/cart');
+                        },
+                      ),
+                      Positioned(
+                        right: 1,
+                        top: 2,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${context.watch<CartProvider>().cartItems.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(width: 16),
                   InkWell(

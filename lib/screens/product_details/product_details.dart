@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/product_model.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/backend/providers/cart_provider.dart';
+import 'package:pelviease_website/backend/providers/product_provider.dart';
+
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final String? productId;
@@ -13,6 +20,48 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int selectedImageIndex = 0;
   int quantity = 1;
+
+  Product? product;
+  bool isLoading = true;
+  AuthProvider? authProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchProductDetails();
+    });
+  }
+
+  Future<void> _fetchProductDetails() async {
+    try {
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+
+      authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (authProvider?.isAuthenticated ?? false) {
+        Provider.of<CartProvider>(context, listen: false).fetchCartItems();
+      }
+
+      final fetchedProduct =
+          await provider.getProductById(widget.productId ?? "");
+
+      if (mounted) {
+        setState(() {
+          product = fetchedProduct;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      // Handle error appropriately
+      print('Error fetching product: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,26 +76,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: Icon(Icons.share, color: Colors.black),
             onPressed: () {},
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          bool isTablet = constraints.maxWidth > 600;
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : product == null
+              ? Center(child: Text('Product not found'))
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    bool isTablet = constraints.maxWidth > 600;
 
-          if (isTablet) {
-            return _buildTabletLayout();
-          } else {
-            return _buildMobileLayout();
-          }
-        },
-      ),
+                    if (isTablet) {
+                      return _buildTabletLayout();
+                    } else {
+                      return _buildMobileLayout();
+                    }
+                  },
+                ),
     );
   }
 
@@ -121,55 +170,30 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ),
             child: Center(
               child: Container(
-                height: 200,
-                width: 200,
+                padding: EdgeInsets.all(12),
+                height: 240,
+                width: 240,
                 decoration: BoxDecoration(
-                  color: Color(0xFFE1A3E8),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Stack(
-                  children: [
-                    // Main dilator shape
-                    Positioned(
-                      left: 60,
-                      top: 40,
-                      child: Container(
-                        width: 30,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFD485DB),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                    ),
-                    // Second dilator shape
-                    Positioned(
-                      left: 110,
-                      top: 60,
-                      child: Container(
-                        width: 25,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFD485DB),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                    // Base
-                    Positioned(
-                      left: 50,
-                      bottom: 40,
-                      child: Container(
-                        width: 100,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFD485DB),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
+                child: product?.images.isNotEmpty ?? false
+                    ? Image.network(
+                        product!.images[selectedImageIndex],
+                        fit: BoxFit.cover,
+                      )
+                    : Icon(
+                        Icons.image,
+                        size: 50,
+                        color: Colors.grey[400],
+                      ),
               ),
             ),
           ),
@@ -177,87 +201,79 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           // Thumbnail images
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(3, (index) {
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    selectedImageIndex = index;
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8),
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: selectedImageIndex == index
-                          ? Color(0xFFD485DB)
-                          : Colors.grey[100]!,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE1A3E8),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            left: 12,
-                            top: 8,
-                            child: Container(
-                              width: 6,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFD485DB),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 22,
-                            top: 12,
-                            child: Container(
-                              width: 5,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFD485DB),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 10,
-                            bottom: 8,
-                            child: Container(
-                              width: 20,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFD485DB),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+            children: [
+              // Left arrow
+              if ((product?.images.length ?? 0) > 3)
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios, size: 20),
+                  onPressed: selectedImageIndex > 0
+                      ? () {
+                          setState(() {
+                            selectedImageIndex = (selectedImageIndex - 1)
+                                .clamp(0, (product!.images.length - 1));
+                          });
+                        }
+                      : null,
                 ),
-              );
-            }),
+              ...List.generate(
+                (product?.images.length ?? 0) > 3
+                    ? 3
+                    : (product?.images.length ?? 0),
+                (i) {
+                  int start = 0;
+                  if ((product?.images.length ?? 0) > 3) {
+                    if (selectedImageIndex >= (product!.images.length - 2)) {
+                      start = product!.images.length - 3;
+                    } else if (selectedImageIndex > 0) {
+                      start = selectedImageIndex - 1;
+                    }
+                  }
+                  int index = start + i;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedImageIndex = index;
+                      });
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 4),
+                      padding: EdgeInsets.all(2),
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: selectedImageIndex == index
+                              ? Color(0xFF5D4E75)
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          product?.images[index] ?? '',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Right arrow
+              if ((product?.images.length ?? 0) > 3)
+                IconButton(
+                  icon: Icon(Icons.arrow_forward_ios, size: 20),
+                  onPressed: selectedImageIndex < (product!.images.length - 1)
+                      ? () {
+                          setState(() {
+                            selectedImageIndex = (selectedImageIndex + 1)
+                                .clamp(0, (product!.images.length - 1));
+                          });
+                        }
+                      : null,
+                ),
+            ],
           ),
         ],
       ),
@@ -281,7 +297,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         children: [
           // Product title
           Text(
-            'Dilator',
+            product?.name ?? 'Product Name',
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -295,16 +311,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             children: [
               Row(
                 children: List.generate(5, (index) {
+                  double rating = product?.currentRating ?? 0;
+                  IconData icon;
+                  if (index < rating.floor()) {
+                    icon = Icons.star;
+                  } else if (index < rating && rating - index >= 0.5) {
+                    icon = Icons.star_half;
+                  } else {
+                    icon = Icons.star_border;
+                  }
                   return Icon(
-                    index < 4 ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
+                    icon,
+                    color: index < (product?.currentRating ?? 0)
+                        ? Colors.amber
+                        : Colors.grey[400],
                     size: 18,
                   );
                 }),
               ),
               SizedBox(width: 8),
               Text(
-                '4.5 (24 reviews)',
+                '${product?.currentRating ?? 0} (${product?.totalRatingCount ?? 0} reviews)',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -314,7 +341,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
           SizedBox(height: 12),
 
-          if (dummyProducts[0].isCertified)
+          if (product?.isCDSCOCertified == true)
             Wrap(
               alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.center,
@@ -334,12 +361,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                 ),
               ],
-            ),
-          SizedBox(height: 20),
+            )
+          else
+            const SizedBox.shrink(),
+          if (product?.isCDSCOCertified == true) SizedBox(height: 20),
 
           // Price
           Text(
-            '₹7000',
+            product?.finalPrice != null
+                ? '₹${product!.finalPrice.toStringAsFixed(2)}'
+                : 'Price not available',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -350,7 +381,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           // Description
           Text(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+            product?.description ?? 'No description available.',
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Colors.grey[700],
               fontSize: 14,
@@ -359,7 +392,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
           SizedBox(height: 24),
 
-          // Quantity selector
           Row(
             children: [
               Container(
@@ -436,25 +468,54 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Widget _buildAddToCartButton() {
-    return SizedBox(
-      height: 48,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.grey[400]!),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    return Consumer<CartProvider>(
+      builder: (context, cartProvider, _) {
+        return SizedBox(
+          height: 48,
+          child: OutlinedButton(
+            onPressed: () {
+              if (authProvider?.isAuthenticated == false) {
+                context.goNamed("authScreen");
+                return;
+              }
+
+              final isInCart = cartProvider.cartItems
+                  .any((item) => item.productId == product!.id);
+              if (!isInCart) {
+                final cartItem = CartItem(
+                  productId: product!.id,
+                  id: DateTime.now().toString(),
+                  name: product!.name,
+                  description: product!.description,
+                  price: product!.finalPrice ?? 0.0,
+                  quantity: quantity,
+                  image: product!.images.isNotEmpty ? product!.images[0] : '',
+                );
+                cartProvider.addItem(cartItem);
+              } else {
+                context.goNamed("cartScreen");
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Colors.grey[400]!),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              cartProvider.cartItems
+                      .any((item) => item.productId == product!.id)
+                  ? 'VIEW CART'
+                  : 'ADD TO CART',
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
           ),
-        ),
-        child: Text(
-          'ADD TO CART',
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -462,7 +523,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return SizedBox(
       height: 48,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          if (authProvider?.isAuthenticated == false) {
+            context.goNamed("authScreen");
+            return;
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xFF5D4E75),
           shape: RoundedRectangleBorder(

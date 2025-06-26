@@ -10,7 +10,9 @@ class AuthProvider with ChangeNotifier {
   String? _errorMessage;
 
   AuthProvider({AuthService? authService})
-      : _authService = authService ?? AuthService();
+      : _authService = authService ?? AuthService() {
+    checkCurrentUser();
+  }
 
   UserModel? get user => _user;
   bool get isLoading => _isLoading;
@@ -19,6 +21,7 @@ class AuthProvider with ChangeNotifier {
 
   // Check if a user is already logged in
   Future<void> checkCurrentUser() async {
+    if (_user != null) return;
     try {
       _setLoading(true);
       _clearError();

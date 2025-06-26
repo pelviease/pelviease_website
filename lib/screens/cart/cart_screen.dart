@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/screens/cart/widgets/empty_cart.dart';
@@ -15,10 +16,6 @@ class CartScreen extends StatelessWidget {
 
     return Container(
       color: backgroundColor,
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.08,
-        vertical: 24,
-      ),
       child: cartProvider.isLoading
           ? Center(child: CircularProgressIndicator())
           : cartProvider.errorMessage != null
@@ -204,13 +201,19 @@ class CartScreen extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.purple[50],
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.medical_services,
-                  color: Colors.purple[300],
-                  size: 36,
+                child: Image.network(
+                  item.image,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.medical_services,
+                      color: Colors.purple[300],
+                      size: 36,
+                    );
+                  },
                 ),
               ),
               SizedBox(width: 16),
@@ -343,13 +346,19 @@ class CartScreen extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.purple[100],
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.medical_services,
-                    color: Colors.purple[300],
-                    size: 30,
+                  child: Image.network(
+                    item.image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.medical_services,
+                        color: Colors.purple[300],
+                        size: 36,
+                      );
+                    },
                   ),
                 ),
                 SizedBox(width: 12),

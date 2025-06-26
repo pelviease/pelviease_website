@@ -4,6 +4,9 @@ import 'package:pelviease_website/backend/models/cart_model.dart';
 
 class CartProvider with ChangeNotifier {
   final CartService _cartService = CartService();
+  CartProvider() {
+    fetchCartItems();
+  }
   List<CartItem> _cartItems = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -27,6 +30,23 @@ class CartProvider with ChangeNotifier {
 
     try {
       _cartItems = await _cartService.getCartItems();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Add item to cart
+  Future<void> addItem(CartItem item) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _cartService.addCartItem(item);
+      _cartItems.add(item);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
