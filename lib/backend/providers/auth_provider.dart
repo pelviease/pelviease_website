@@ -26,6 +26,8 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearError();
       _user = await _authService.getCurrentUser();
+      print("Current user: ${_user?.name}");
+
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString().replaceFirst("Exception: ", "");
@@ -81,6 +83,30 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString().replaceFirst("Exception: ", "");
       notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> updateAddressAndPhoneNumber({
+    required String userId,
+    required Map<String, dynamic> address,
+    required String phoneNumber,
+  }) async {
+    try {
+      _setLoading(true);
+      _clearError();
+      if (_user == null) throw Exception("User not authenticated");
+
+      final updatedUser = await _authService.updateUserDetails(
+        userId: _user!.id,
+        address: address,
+        phoneNumber: phoneNumber,
+      );
+
+      _user = updatedUser;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst("Exception: ", "");
     } finally {
       _setLoading(false);
     }

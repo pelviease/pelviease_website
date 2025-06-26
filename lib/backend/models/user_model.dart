@@ -3,12 +3,16 @@ class UserModel {
   final String name;
   final String email;
   final bool isDoctor;
+  final String? address;
+  final String? phoneNumber;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
     required this.isDoctor,
+    this.address = "",
+    this.phoneNumber = "",
   });
 
   // Factory constructor to create a UserModel from JSON
@@ -18,6 +22,8 @@ class UserModel {
       name: json['name'] as String,
       email: json['email'] as String,
       isDoctor: json['isDoctor'] as bool,
+      address: json['address'] as String? ?? "",
+      phoneNumber: json['phoneNumber'] as String? ?? "",
     );
   }
 
@@ -28,6 +34,8 @@ class UserModel {
       'name': name,
       'email': email,
       'isDoctor': isDoctor,
+      'address': address ?? "",
+      'phoneNumber': phoneNumber ?? "",
     };
   }
 }

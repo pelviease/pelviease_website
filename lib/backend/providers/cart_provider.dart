@@ -95,6 +95,11 @@ class CartProvider with ChangeNotifier {
     }
   }
 
+  void removeProductItem(String productId) {
+    _cartItems.removeWhere((item) => item.productId == productId);
+    notifyListeners();
+  }
+
   // Clear cart
   Future<void> clearCart() async {
     try {

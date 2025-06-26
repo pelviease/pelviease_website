@@ -120,4 +120,23 @@ class AuthService {
     }
     return 'An error occurred: ${error.toString()}';
   }
+
+  Future<UserModel> updateUserDetails({
+    required String userId,
+    required Map<String, dynamic> address,
+    required String phoneNumber,
+  }) async {
+    try {
+      final userRef = _firestore.collection('users').doc(userId);
+      await userRef.update({
+        'address': address,
+        'phoneNumber': phoneNumber,
+      });
+
+      final updatedDoc = await userRef.get();
+      return UserModel.fromJson(updatedDoc.data()!);
+    } catch (e) {
+      throw Exception("Failed to update user details: ${e.toString()}");
+    }
+  }
 }

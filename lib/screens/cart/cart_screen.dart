@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
-import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/const/toaster.dart';
 import 'package:pelviease_website/screens/cart/widgets/empty_cart.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -35,18 +36,18 @@ class CartScreen extends StatelessWidget {
                     }
 
                     if (isDesktop) {
-                      return _buildDesktopLayout(cartProvider);
+                      return _buildDesktopLayout(context, cartProvider);
                     } else if (isTablet) {
-                      return _buildTabletLayout(cartProvider);
+                      return _buildTabletLayout(context, cartProvider);
                     } else {
-                      return _buildMobileLayout(cartProvider);
+                      return _buildMobileLayout(context, cartProvider);
                     }
                   },
                 ),
     );
   }
 
-  Widget _buildDesktopLayout(CartProvider cartProvider) {
+  Widget _buildDesktopLayout(BuildContext context, CartProvider cartProvider) {
     return Padding(
       padding: EdgeInsets.all(24.0),
       child: Row(
@@ -59,14 +60,14 @@ class CartScreen extends StatelessWidget {
           SizedBox(width: 24),
           Expanded(
             flex: 1,
-            child: _buildOrderSummary(cartProvider),
+            child: _buildOrderSummary(context, cartProvider),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabletLayout(CartProvider cartProvider) {
+  Widget _buildTabletLayout(BuildContext context, CartProvider cartProvider) {
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: Row(
@@ -79,14 +80,14 @@ class CartScreen extends StatelessWidget {
           SizedBox(width: 16),
           Expanded(
             flex: 2,
-            child: _buildOrderSummary(cartProvider),
+            child: _buildOrderSummary(context, cartProvider),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMobileLayout(CartProvider cartProvider) {
+  Widget _buildMobileLayout(BuildContext context, CartProvider cartProvider) {
     return Column(
       children: [
         Expanded(
@@ -97,7 +98,7 @@ class CartScreen extends StatelessWidget {
                 children: [
                   _buildCartItemsList(cartProvider),
                   SizedBox(height: 16),
-                  _buildOrderSummary(cartProvider),
+                  _buildOrderSummary(context, cartProvider),
                 ],
               ),
             ),
@@ -462,6 +463,7 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildOrderSummary(
+    BuildContext context,
     CartProvider cartProvider,
   ) {
     return Container(
@@ -531,7 +533,17 @@ class CartScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (cartProvider.cartItems.isNotEmpty) {
+                    context.go('/checkout');
+                  } else {
+                    showCustomToast(
+                        title: "Empty",
+                        description:
+                            "Your cart is empty, please add items to proceed.",
+                        type: ToastificationType.info);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[800],
                   foregroundColor: Colors.white,

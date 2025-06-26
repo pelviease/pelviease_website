@@ -8,6 +8,8 @@ import 'package:pelviease_website/screens/cart/cart_screen.dart';
 import 'package:pelviease_website/screens/contact/contact_screen.dart';
 import 'package:pelviease_website/screens/doctors/doctors_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
+import 'package:pelviease_website/screens/orders/checkout_screen.dart';
+import 'package:pelviease_website/screens/orders/order_screen.dart';
 import 'package:pelviease_website/screens/products/products_screen.dart';
 import 'package:pelviease_website/widgets/app_scaffold.dart';
 import 'package:provider/provider.dart';
@@ -107,127 +109,17 @@ final GoRouter appRouter = GoRouter(
               return const CartScreen();
             }),
         GoRoute(
-            path: "/orders",
-            builder: (context, state) {
-              return const CartScreen();
-            }),
-        // GoRoute(
-        //     path: '/events',
-        //     builder: (context, state) => const EventsScreen(),
-        //     routes: [
-        //       GoRoute(
-        //         path: ':eventParam',
-        //         builder: (context, state) {
-        //           final eventData =
-        //               state.extra is Event ? state.extra as Event : null;
-
-        //           if (eventData != null) {
-        //             return EventDetails(event: eventData);
-        //           }
-
-        //           final param = state.pathParameters['eventParam'] ?? '';
-        //           final eventId = param.split('-').first;
-
-        //           return FutureBuilder<Event?>(
-        //             future: Provider.of<EventProvider>(context, listen: false)
-        //                 .getEventById(eventId),
-        //             builder: (context, snapshot) {
-        //               if (snapshot.connectionState == ConnectionState.waiting) {
-        //                 return const Scaffold(
-        //                   body: ParticleBackground(
-        //                     child: Center(
-        //                       child: CircularProgressIndicator(
-        //                         color: secondaryColor,
-        //                       ),
-        //                     ),
-        //                   ),
-        //                 );
-        //               }
-
-        //               if (snapshot.hasError || !snapshot.hasData) {
-        //                 return const EventsScreen();
-        //               }
-
-        //               return EventDetails(event: snapshot.data!);
-        //             },
-        //           );
-        //         },
-        //         redirect: (context, state) async {
-        //           if (state.extra is Event) {
-        //             return null;
-        //           }
-
-        //           final param = state.pathParameters['eventParam'] ?? '';
-        //           if (param.isEmpty) {
-        //             return '/events';
-        //           }
-
-        //           final eventId = param.split('-').first;
-        //           if (eventId.isEmpty) {
-        //             return '/events';
-        //           }
-
-        //           final eventProvider =
-        //               Provider.of<EventProvider>(context, listen: false);
-        //           final event = await eventProvider.getEventById(eventId);
-
-        //           if (event == null) {
-        //             return '/events';
-        //           }
-
-        //           return null;
-        //         },
-        //       )
-        // ]),
-        // GoRoute(
-        //   path: '/team',
-        //   builder: (context, state) => const TeamScreen(),
-        //   routes: [
-        // GoRoute(
-        //   path: 'recruitment',
-        //   name: 'recruitmentScreen',
-        //   builder: (context, state) => const UserOpenRecruitmentsList(),
-        // ),
-        // GoRoute(
-        //   path: 'recruitment/:id/:department',
-        //   name: 'recruitmentApplications',
-        //   builder: (context, state) {
-        //     final recruitmentId = state.pathParameters['id']!;
-        //     final department = state.pathParameters['department']!;
-        //     return RecruitmentFormScreen(
-        //       recruitmentId: recruitmentId,
-        //       dept: department,
-        //     );
-        //   },
-        // ),
-        // ],
-        // ),
-
-        // GoRoute(
-        //     path: '/onGoingEvents',
-        //     builder: (context, state) => const OngoingEventsPage(),
-        //     routes: [
-        // GoRoute(
-        //   path: ':eventId',
-        //   builder: (context, state) {
-        //     final eventId = state.pathParameters['eventId']!;
-        //     return OngoingEventDetails(eventId: eventId);
-        //   },
-        // ),
-        // GoRoute(
-        //   path: '/register/:eventId',
-        //   builder: (context, state) {
-        //     final eventId = state.pathParameters['eventId']!;
-        //     return OngoingEventRegister(
-        //       eventId: eventId,
-        //     );
-        //   },
-        // ),
-        // ]),
-        // GoRoute(
-        //   path: '/joinus',
-        //   builder: (context, state) => const HomeScreen(section: 'footer'),
-        // ),
+          path: '/checkout',
+          builder: (context, state) {
+            return CheckoutScreen();
+          },
+        ),
+        GoRoute(
+          path: '/orders',
+          builder: (context, state) {
+            return OrderScreen();
+          },
+        ),
       ],
     ),
   ],
