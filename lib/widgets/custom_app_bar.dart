@@ -4,7 +4,6 @@ import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:provider/provider.dart';
-// import 'package:provider/provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isAuth;
@@ -15,11 +14,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AuthProvider>(context);
-    // final currentuser = provider.user;
-    // final username = provider.username;
-
-    // Check if the screen width is less than 768px (mobile view)
     bool isMobile = MediaQuery.of(context).size.width < 720;
+    final GlobalKey _dropdownKey = GlobalKey();
 
     return Container(
       padding: isMobile
@@ -42,7 +38,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           children: [
             InkWell(
               onTap: () {
-                // Scaffold.of(context).openDrawer();
                 context.go('/');
               },
               child: Image.asset(
@@ -50,11 +45,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 height: 24,
               ),
             ),
-            // if (isMobile)
-            //   Text(
-            //     "pelviease",
-            //     style: Theme.of(context).textTheme.titleLarge?.copyWith(),
-            //   ),
             if (!isMobile && !isAuth)
               Container(
                 height: 46,
@@ -74,19 +64,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               Row(
                 children: [
                   ElevatedButton(
-                      onPressed: () {
-                        // Navigator.of(context).pop();
-
-                        context.goNamed('authScreen');
-                      },
-                      style: ElevatedButton.styleFrom().copyWith(
-                        backgroundColor: WidgetStateProperty.all(buttonColor),
-                        foregroundColor: WidgetStateProperty.all(Colors.white),
-                      ),
-                      child: Text("Login"))
+                    onPressed: () {
+                      context.goNamed('authScreen');
+                    },
+                    style: ElevatedButton.styleFrom().copyWith(
+                      backgroundColor: WidgetStateProperty.all(buttonColor),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                    ),
+                    child: Text("Login"),
+                  ),
                 ],
               ),
-            if (!isMobile && !isAuth && isAuthenticated) ...[
+            if (!isMobile && !isAuth && isAuthenticated)
               Row(
                 children: [
                   Stack(
@@ -130,119 +119,193 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   SizedBox(width: 16),
                   InkWell(
-                    onTap: () {
-                      showMenu(
+                    key: _dropdownKey,
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () async {
+                      final RenderBox? button = _dropdownKey.currentContext
+                          ?.findRenderObject() as RenderBox?;
+                      final RenderBox? overlay = Overlay.of(context)
+                          .context
+                          .findRenderObject() as RenderBox?;
+                      if (button == null || overlay == null) return;
+
+                      final RelativeRect position = RelativeRect.fromRect(
+                        Rect.fromPoints(
+                          button.localToGlobal(Offset.zero, ancestor: overlay),
+                          button.localToGlobal(
+                              button.size.bottomRight(Offset.zero),
+                              ancestor: overlay),
+                        ),
+                        Offset.zero & overlay.size,
+                      );
+
+                      final value = await showMenu<String>(
                         context: context,
                         position: RelativeRect.fromLTRB(
-                          MediaQuery.of(context).size.width,
-                          kToolbarHeight + 10,
-                          16,
-                          0,
+                          position.left,
+                          position.top + 8,
+                          position.right,
+                          position.bottom,
                         ),
                         items: <PopupMenuEntry<String>>[
                           PopupMenuItem<String>(
                             value: 'profile',
-                            child: ListTile(
-                              leading:
-                                  Icon(Icons.person, color: Colors.black54),
-                              title: Text('Profile'),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  size: 16,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Profile',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
                             ),
                           ),
                           PopupMenuItem<String>(
                             value: 'orders',
-                            child: ListTile(
-                              leading: Icon(Icons.shopping_bag_outlined,
-                                  color: Colors.black54),
-                              title: Text('Orders'),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.shopping_bag_outlined,
+                                  size: 16,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Orders',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
                             ),
                           ),
-                          const PopupMenuDivider(),
+                          const PopupMenuDivider(height: 1),
                           PopupMenuItem<String>(
                             value: 'logout',
-                            child: ListTile(
-                              leading:
-                                  Icon(Icons.logout, color: Colors.redAccent),
-                              title: Text('Logout',
-                                  style: TextStyle(color: Colors.redAccent)),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.logout,
+                                  size: 16,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Logout',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                      ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                        elevation: 8,
-                        color: Colors.white,
+                        elevation: 4,
+                        color: Theme.of(context).colorScheme.surface,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ).then((value) {
-                        if (value == 'profile') {
-                          context.go('/profile');
-                        } else if (value == 'orders') {
-                          context.go('/orders');
-                        } else if (value == 'logout') {
-                          showDialog(
-                            context: context,
-                            builder: (dialogContext) {
-                              return AlertDialog(
-                                title: const Text("Logout"),
-                                content: const Text(
-                                    "Are you sure you want to logout?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(dialogContext).pop();
-                                    },
-                                    child: const Text("Cancel"),
+                        constraints: const BoxConstraints(minWidth: 160),
+                      );
+
+                      if (value == 'profile') {
+                        context.go('/profile');
+                      } else if (value == 'orders') {
+                        context.go('/orders');
+                      } else if (value == 'logout') {
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              title: Text(
+                                'Logout',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              content: Text(
+                                'Are you sure you want to logout?',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text(
+                                    'Cancel',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      final authProvider =
-                                          context.read<AuthProvider>();
-                                      authProvider.logout();
-                                      Navigator.of(dialogContext).pop();
-                                      context.go('/');
-                                    },
-                                    child: const Text("Logout"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    final authProvider =
+                                        context.read<AuthProvider>();
+                                    authProvider.logout();
+                                    Navigator.of(context).pop();
+                                    Future.microtask(() => context.go('/'));
+                                  },
+                                  child: Text(
+                                    'Logout',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .error,
+                                        ),
                                   ),
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      });
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 3,
-                        ),
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.person,
-                            size: 28,
-                            color: Colors.black54,
+                            size: 24,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                          Icon(Icons.arrow_drop_down,
-                              color: Colors.black54, size: 28),
-                          // if (username != null)
-                          //   Text(
-                          //     username,
-                          //     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          //           color: textColor,
-                          //         ),
-                          //   ),
+                          const SizedBox(width: 4),
+                          Text(
+                            provider.user?.name.split(' ').first ?? 'User',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            size: 24,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
-            ],
-
+              ),
             if (isMobile)
               IconButton(
                 icon: const Icon(

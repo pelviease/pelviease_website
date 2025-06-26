@@ -106,6 +106,11 @@ final GoRouter appRouter = GoRouter(
             builder: (context, state) {
               return const CartScreen();
             }),
+        GoRoute(
+            path: "/orders",
+            builder: (context, state) {
+              return const CartScreen();
+            }),
         // GoRoute(
         //     path: '/events',
         //     builder: (context, state) => const EventsScreen(),
