@@ -378,8 +378,7 @@ class FooterSection extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _socialIcon(
-            'assets/icons/twitter.png', 'https://x.com/Ecellvitb', isMobile),
+        _socialIcon('assets/icons/twitter.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
         _socialIcon('assets/icons/linkedin.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
