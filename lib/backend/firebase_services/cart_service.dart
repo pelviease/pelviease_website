@@ -20,7 +20,7 @@ class CartService {
     try {
       await _getCartCollection().doc(item.id).set({
         'productId': item.productId,
-        'name': item.name,
+        'productName': item.productName,
         'description': item.description,
         'price': item.price,
         'quantity': item.quantity,
@@ -40,7 +40,7 @@ class CartService {
         return CartItem(
           productId: data['productId'] as String,
           id: doc.id,
-          name: data['name'] as String,
+          productName: data['productName'] as String,
           description: data['description'] as String,
           price: (data['price'] as num).toDouble(),
           quantity: data['quantity'] as int,
@@ -57,7 +57,7 @@ class CartService {
     try {
       await _getCartCollection().doc(item.id).set({
         'productId': item.productId,
-        'name': item.name,
+        'productName': item.productName,
         'description': item.description,
         'price': item.price,
         'quantity': item.quantity,

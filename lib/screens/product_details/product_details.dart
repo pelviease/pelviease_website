@@ -8,6 +8,7 @@ import 'package:pelviease_website/backend/providers/product_provider.dart';
 
 import 'package:pelviease_website/const/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final String? productId;
@@ -484,10 +485,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               if (!isInCart) {
                 final cartItem = CartItem(
                   productId: product!.id,
-                  id: DateTime.now().toString(),
-                  name: product!.name,
+                  id: const Uuid().v4(),
+                  productName: product!.name,
                   description: product!.description,
-                  price: product!.finalPrice ?? 0.0,
+                  price: product!.finalPrice,
                   quantity: quantity,
                   image: product!.images.isNotEmpty ? product!.images[0] : '',
                 );

@@ -111,13 +111,20 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/checkout',
           builder: (context, state) {
-            return CheckoutScreen();
+            final authProvider =
+                Provider.of<AuthProvider>(context, listen: false);
+
+            return CheckoutScreen(
+              userId: authProvider.user?.id ?? '',
+              userName: authProvider.user?.name ?? '',
+              phoneNumber: authProvider.user?.phoneNumber ?? '',
+            );
           },
         ),
         GoRoute(
           path: '/orders',
           builder: (context, state) {
-            return OrderScreen();
+            return MyOrdersScreen();
           },
         ),
       ],

@@ -26,7 +26,6 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearError();
       _user = await _authService.getCurrentUser();
-      print("Current user: ${_user?.name}");
 
       notifyListeners();
     } catch (e) {
@@ -43,6 +42,7 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearError();
       _user = await _authService.login(email, password);
+      checkCurrentUser();
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString().replaceFirst("Exception: ", "");
@@ -63,6 +63,7 @@ class AuthProvider with ChangeNotifier {
       _setLoading(true);
       _clearError();
       _user = await _authService.signup(name, email, password, isDoctor);
+      checkCurrentUser();
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString().replaceFirst("Exception: ", "");
