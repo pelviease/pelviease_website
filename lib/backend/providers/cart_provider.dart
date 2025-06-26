@@ -66,7 +66,7 @@ class CartProvider with ChangeNotifier {
         final updatedItem = CartItem(
           productId: item.productId,
           id: item.id,
-          name: item.name,
+          productName: item.productName,
           description: item.description,
           price: item.price,
           quantity: newQuantity,

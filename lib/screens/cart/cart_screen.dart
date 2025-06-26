@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/const/toaster.dart';
@@ -14,6 +15,7 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
+    Provider.of<AuthProvider>(context, listen: false);
 
     return Container(
       color: backgroundColor,
@@ -223,7 +225,7 @@ class CartScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.name,
+                      item.productName,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -368,7 +370,7 @@ class CartScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.name,
+                        item.productName,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,

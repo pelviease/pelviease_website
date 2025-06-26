@@ -15,7 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<AuthProvider>(context);
     bool isMobile = MediaQuery.of(context).size.width < 720;
-    final GlobalKey _dropdownKey = GlobalKey();
+    final GlobalKey dropdownKey = GlobalKey();
 
     return Container(
       padding: isMobile
@@ -119,10 +119,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   SizedBox(width: 16),
                   InkWell(
-                    key: _dropdownKey,
+                    key: dropdownKey,
                     borderRadius: BorderRadius.circular(8),
                     onTap: () async {
-                      final RenderBox? button = _dropdownKey.currentContext
+                      final RenderBox? button = dropdownKey.currentContext
                           ?.findRenderObject() as RenderBox?;
                       final RenderBox? overlay = Overlay.of(context)
                           .context
@@ -218,7 +218,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       );
 
                       if (value == 'profile') {
-                        context.go('/profile');
+                        context.go('/orders');
                       } else if (value == 'orders') {
                         context.go('/orders');
                       } else if (value == 'logout') {
