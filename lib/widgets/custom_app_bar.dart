@@ -254,7 +254,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            provider.user?.name ?? 'User',
+                            provider.user?.name.split(' ').first ?? 'User',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelLarge
