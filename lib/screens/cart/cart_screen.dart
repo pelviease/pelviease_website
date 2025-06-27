@@ -118,7 +118,8 @@ class CartScreen extends StatelessWidget {
         if (isMobile) {
           return Column(
             children: cartProvider.cartItems
-                .map((item) => _buildMobileCartCard(item, cartProvider))
+                .map(
+                    (item) => _buildMobileCartCard(item, cartProvider, context))
                 .toList(),
           );
         } else {
@@ -170,8 +171,8 @@ class CartScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                ...cartProvider.cartItems
-                    .map((item) => _buildDesktopCartItem(item, cartProvider)),
+                ...cartProvider.cartItems.map((item) =>
+                    _buildDesktopCartItem(item, cartProvider, context)),
               ],
             ),
           );
@@ -180,7 +181,8 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileCartCard(CartItem item, CartProvider cartProvider) {
+  Widget _buildMobileCartCard(
+      CartItem item, CartProvider cartProvider, BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
@@ -200,23 +202,28 @@ class CartScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Image.network(
-                  item.image,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.medical_services,
-                      color: Colors.purple[300],
-                      size: 36,
-                    );
-                  },
+              InkWell(
+                onTap: () {
+                  context.go('/products/${item.productId}');
+                },
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Image.network(
+                    item.image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.medical_services,
+                        color: Colors.purple[300],
+                        size: 36,
+                      );
+                    },
+                  ),
                 ),
               ),
               SizedBox(width: 16),
@@ -331,7 +338,8 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopCartItem(CartItem item, CartProvider cartProvider) {
+  Widget _buildDesktopCartItem(
+      CartItem item, CartProvider cartProvider, BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -343,53 +351,58 @@ class CartScreen extends StatelessWidget {
         children: [
           Expanded(
             flex: 2,
-            child: Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              onTap: () {
+                context.go('/products/${item.productId}');
+              },
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Image.network(
+                      item.image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.medical_services,
+                          color: Colors.purple[300],
+                          size: 36,
+                        );
+                      },
+                    ),
                   ),
-                  child: Image.network(
-                    item.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.medical_services,
-                        color: Colors.purple[300],
-                        size: 36,
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.productName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.productName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        item.description,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
+                        SizedBox(height: 4),
+                        Text(
+                          item.description,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Expanded(

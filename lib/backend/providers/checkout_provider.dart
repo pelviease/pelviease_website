@@ -99,8 +99,8 @@ class CheckoutProvider with ChangeNotifier {
         0.0,
         (sum, item) => sum + (item.price * item.quantity),
       );
-      const taxRate = 0.1; // Example: 10% tax rate
-      const shippingCost = 5.0; // Example: Fixed shipping cost
+      const taxRate = 0.1;
+      const shippingCost = 5.0;
       final tax = subtotal * taxRate;
       final total = subtotal + tax + shippingCost;
 

@@ -110,6 +110,7 @@ final GoRouter appRouter = GoRouter(
             }),
         GoRoute(
           path: '/checkout',
+          name: 'checkoutScreen',
           builder: (context, state) {
             final authProvider =
                 Provider.of<AuthProvider>(context, listen: false);

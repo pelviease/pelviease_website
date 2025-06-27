@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/product_model.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'imgaes_carousel.dart';
 
@@ -94,17 +99,25 @@ class ProductsView extends StatelessWidget {
     if (isMobile) {
       return SizedBox(
         width: double.infinity,
-        child: _buildDetailsContent(isMobile: true, isTablet: false),
+        child: _buildDetailsContent(
+          context,
+          isMobile: true,
+          isTablet: false,
+        ),
       );
     } else {
       return Expanded(
         flex: 3,
-        child: _buildDetailsContent(isMobile: false, isTablet: isTablet),
+        child: _buildDetailsContent(
+          context,
+          isMobile: false,
+          isTablet: isTablet,
+        ),
       );
     }
   }
 
-  Widget _buildDetailsContent(
+  Widget _buildDetailsContent(BuildContext context,
       {required bool isMobile, required bool isTablet}) {
     return Column(
       crossAxisAlignment:
@@ -236,7 +249,36 @@ class ProductsView extends StatelessWidget {
                     height: 48,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        if (authProvider.isAuthenticated == false) {
+                          context.goNamed("authScreen");
+                          return;
+                        }
+                        // Handle buy now action
+                        final cartProvider =
+                            Provider.of<CartProvider>(context, listen: false);
+                        final isInCart = cartProvider.cartItems
+                            .any((item) => item.productId == product.id);
+                        if (!isInCart) {
+                          final cartItem = CartItem(
+                            productId: product.id,
+                            id: const Uuid().v4(),
+                            productName: product.name,
+                            description: product.description,
+                            price: product.finalPrice,
+                            quantity: 1,
+                            image: product.images.isNotEmpty
+                                ? product.images[0]
+                                : '',
+                          );
+                          cartProvider.addItem(cartItem);
+                        }
+                        context.goNamed(
+                          "cartScreen",
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
                         shape: RoundedRectangleBorder(
@@ -310,7 +352,36 @@ class ProductsView extends StatelessWidget {
                   SizedBox(
                     height: isTablet ? 45 : 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        if (authProvider.isAuthenticated == false) {
+                          context.goNamed("authScreen");
+                          return;
+                        }
+                        // Handle buy now action
+                        final cartProvider =
+                            Provider.of<CartProvider>(context, listen: false);
+                        final isInCart = cartProvider.cartItems
+                            .any((item) => item.productId == product.id);
+                        if (!isInCart) {
+                          final cartItem = CartItem(
+                            productId: product.id,
+                            id: const Uuid().v4(),
+                            productName: product.name,
+                            description: product.description,
+                            price: product.finalPrice,
+                            quantity: 1,
+                            image: product.images.isNotEmpty
+                                ? product.images[0]
+                                : '',
+                          );
+                          cartProvider.addItem(cartItem);
+                        }
+                        context.goNamed(
+                          "cartScreen",
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
                         shape: RoundedRectangleBorder(

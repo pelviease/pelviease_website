@@ -529,6 +529,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             context.goNamed("authScreen");
             return;
           }
+          // Handle buy now action
+          final cartProvider =
+              Provider.of<CartProvider>(context, listen: false);
+          final isInCart = cartProvider.cartItems
+              .any((item) => item.productId == product!.id);
+          if (!isInCart) {
+            final cartItem = CartItem(
+              productId: product!.id,
+              id: const Uuid().v4(),
+              productName: product!.name,
+              description: product!.description,
+              price: product!.finalPrice,
+              quantity: quantity,
+              image: product!.images.isNotEmpty ? product!.images[0] : '',
+            );
+            cartProvider.addItem(cartItem);
+          }
+          context.goNamed(
+            "cartScreen",
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xFF5D4E75),
