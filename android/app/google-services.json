@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1081810673966",
+    "project_id": "pelviease-website",
+    "storage_bucket": "pelviease-website.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081810673966:android:235567def96f536ef81abf",
+        "android_client_info": {
+          "package_name": "com.example.pelviease_website"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_UexDeaSz3nzAiyaQvsLig2zBm9Y46HI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
