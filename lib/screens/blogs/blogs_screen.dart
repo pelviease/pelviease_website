@@ -10,10 +10,10 @@ class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
 
   @override
-  _BlogsScreenState createState() => _BlogsScreenState();
+  BlogsScreenState createState() => BlogsScreenState();
 }
 
-class _BlogsScreenState extends State<BlogsScreen>
+class BlogsScreenState extends State<BlogsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -35,78 +35,112 @@ class _BlogsScreenState extends State<BlogsScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+    final isTablet = size.width >= 600 && size.width < 900;
+
     return Consumer<BlogProvider>(builder: (context, blogProvider, _) {
       return SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 16 : 24,
+            vertical: 16,
+          ),
           child: SizedBox(
             width: size.width,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Our Latest Blogs",
-                  style: Theme.of(context).textTheme.displayLarge,
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontSize: isMobile
+                            ? 24
+                            : isTablet
+                                ? 28
+                                : 32,
+                      ),
                 ),
                 const SizedBox(height: 20),
                 Center(
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.5,
+                    width: isMobile
+                        ? size.width - 60
+                        : isTablet
+                            ? size.width * 0.6
+                            : size.width * 0.4,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 15),
+                      horizontal: 8,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4E1E6), // Light pink background
+                      color: const Color(0xFFF4E1E6),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 0),
-                      child: TabBar(
-                        controller: _tabController,
-                        labelColor: backgroundColor,
-                        unselectedLabelColor: Colors.black,
-                        indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: buttonColor,
-                        ),
-                        indicatorPadding:
-                            const EdgeInsets.symmetric(horizontal: 1),
-                        labelPadding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                        tabs: const [
-                          Tab(text: 'All'),
-                          Tab(text: 'Our blogs'),
-                          Tab(text: 'News'),
-                          Tab(text: 'Success stories'),
-                        ],
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: isMobile,
+                      labelColor: backgroundColor,
+                      unselectedLabelColor: Colors.black,
+                      dividerColor: Colors.transparent,
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: buttonColor,
                       ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      tabs: const [
+                        Tab(text: 'All'),
+                        Tab(text: 'Our blogs'),
+                        Tab(text: 'News'),
+                        Tab(text: 'Success stories'),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: isMobile ? 40 : 20),
                 SizedBox(
-                  height: size.height * 0.6, // Adjust height as needed
+                  height: isMobile
+                      ? size.height * 0.7
+                      : isTablet
+                          ? size.height * 0.65
+                          : size.height * 0.7,
                   child: TabBarView(
                     controller: _tabController,
                     children: [
                       _buildBlogList(
-                          blogProvider.blogsStream, (blogs) => blogs),
+                        blogProvider.blogsStream,
+                        (blogs) => blogs,
+                        size,
+                        isMobile,
+                        isTablet,
+                      ),
                       _buildBlogList(
-                          blogProvider.blogsStream,
-                          (blogs) => blogs
-                              .where((blog) => blog.blogType == 'blogs')
-                              .toList()),
+                        blogProvider.blogsStream,
+                        (blogs) => blogs
+                            .where((blog) => blog.blogType == 'blogs')
+                            .toList(),
+                        size,
+                        isMobile,
+                        isTablet,
+                      ),
                       _buildBlogList(
-                          blogProvider.blogsStream,
-                          (blogs) => blogs
-                              .where((blog) => blog.blogType == 'news')
-                              .toList()),
+                        blogProvider.blogsStream,
+                        (blogs) => blogs
+                            .where((blog) => blog.blogType == 'news')
+                            .toList(),
+                        size,
+                        isMobile,
+                        isTablet,
+                      ),
                       _buildBlogList(
-                          blogProvider.blogsStream,
-                          (blogs) => blogs
-                              .where((blog) => blog.blogType == 'sucessStories')
-                              .toList()),
+                        blogProvider.blogsStream,
+                        (blogs) => blogs
+                            .where((blog) => blog.blogType == 'successStories')
+                            .toList(),
+                        size,
+                        isMobile,
+                        isTablet,
+                      ),
                     ],
                   ),
                 ),
@@ -121,7 +155,12 @@ class _BlogsScreenState extends State<BlogsScreen>
   }
 
   Widget _buildBlogList(
-      Stream<List<Blog>> stream, List<Blog> Function(List<Blog>) filter) {
+    Stream<List<Blog>> stream,
+    List<Blog> Function(List<Blog>) filter,
+    Size size,
+    bool isMobile,
+    bool isTablet,
+  ) {
     return StreamBuilder<List<Blog>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -140,15 +179,22 @@ class _BlogsScreenState extends State<BlogsScreen>
           );
         }
         final blogs = filter(snapshot.data!);
-        return SizedBox(
-          width: MediaQuery.of(context).size.width > 600
-              ? MediaQuery.of(context).size.width * 0.82
-              : MediaQuery.of(context).size.width,
+        return SingleChildScrollView(
           child: Wrap(
-            spacing: 24,
-            runSpacing: 24,
-            alignment: WrapAlignment.center,
-            children: blogs.map((blog) => BlogCard(blog: blog)).toList(),
+            spacing: isMobile ? 16 : 24,
+            runSpacing: isMobile ? 16 : 24,
+            alignment: WrapAlignment.start,
+            children: blogs.map((blog) {
+              final cardWidth = isMobile
+                  ? size.width - 32
+                  : isTablet
+                      ? (size.width - 48) / 2
+                      : (size.width - 72) / 3;
+              return SizedBox(
+                width: cardWidth.clamp(300, 400),
+                child: BlogCard(blog: blog),
+              );
+            }).toList(),
           ),
         );
       },

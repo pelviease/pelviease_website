@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/backend/providers/product_provider.dart';
 import 'package:pelviease_website/screens/products/widgets/products_view.dart';
+import 'package:pelviease_website/widgets/footer.dart';
 import 'package:provider/provider.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -16,15 +17,25 @@ class ProductsScreen extends StatelessWidget {
         if (provider.error != null) {
           return Center(child: Text(provider.error!));
         }
-        return ListView.builder(
-          itemCount: provider.products.length,
-          itemBuilder: (context, index) {
-            final product = provider.products[index];
-            return ProductsView(
-              product: product,
-              isEven: index.isEven,
-            );
-          },
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: provider.products.length,
+                itemBuilder: (context, index) {
+                  final product = provider.products[index];
+                  return ProductsView(
+                    product: product,
+                    isEven: index.isEven,
+                  );
+                },
+              ),
+              const FooterSection(),
+            ],
+          ),
         );
       },
     );

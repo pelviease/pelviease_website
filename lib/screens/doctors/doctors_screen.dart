@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pelviease_website/backend/models/our_content.dart';
 import 'package:pelviease_website/backend/providers/doctor_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/widgets/footer.dart';
 import 'package:provider/provider.dart';
 
 class DoctorsScreen extends StatefulWidget {
@@ -45,147 +46,150 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
       padding: const EdgeInsets.all(24.0),
       child: Consumer<DoctorProvider>(
         builder: (context, doctorProvider, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Find Doctors',
-                style: TextStyle(
-                  fontSize: isMobile ? 24 : 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Find Doctors',
+                  style: TextStyle(
+                    fontSize: isMobile ? 24 : 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: isMobile ? size.width - 120 : 400,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) =>
-                            doctorProvider.searchDoctors(value),
-                        decoration: InputDecoration(
-                          hintText: 'Search by specialization',
-                          hintStyle: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16,
-                          ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Icon(
-                              Icons.search,
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: isMobile ? size.width - 170 : 400,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) =>
+                              doctorProvider.searchDoctors(value),
+                          decoration: InputDecoration(
+                            hintText: 'Search by specialization',
+                            hintStyle: TextStyle(
                               color: Colors.black54,
-                              size: 22,
+                              fontSize: 16,
+                            ),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Icon(
+                                Icons.search,
+                                color: Colors.black54,
+                                size: 22,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            disabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: lightcyclamen.withOpacity(0.6),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
                             ),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: lightcyclamen.withOpacity(0.6),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
                         ),
                       ),
                     ),
-                  ),
-                  InkWell(
-                    onTap: _showFilterDialog,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: lightcyclamen.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(
-                        Icons.tune_rounded,
-                        color: Colors.black,
-                        size: 24,
+                    InkWell(
+                      onTap: _showFilterDialog,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: lightcyclamen.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.tune_rounded,
+                          color: Colors.black,
+                          size: 24,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              if (doctorProvider.hasActiveFilters)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (doctorProvider.searchQuery.isNotEmpty)
-                        FilterChip(
-                          onSelected: (value) {
-                            doctorProvider.searchDoctors(
-                                value ? doctorProvider.searchQuery : '');
-                          },
-                          label:
-                              Text('Search: "${doctorProvider.searchQuery}"'),
-                          onDeleted: () => doctorProvider.clearSearch(),
-                          deleteIcon: const Icon(Icons.close, size: 16),
-                        ),
-                      if (doctorProvider.selectedLocation.isNotEmpty)
-                        FilterChip(
-                          onSelected: (value) {
-                            doctorProvider.filterByLocation(
-                                value ? doctorProvider.selectedLocation : '');
-                          },
-                          label: Text(
-                              'Location: "${doctorProvider.selectedLocation}"'),
-                          onDeleted: () => doctorProvider.clearLocationFilter(),
-                          deleteIcon: const Icon(Icons.close, size: 16),
-                        ),
-                      TextButton.icon(
-                        onPressed: () => doctorProvider.clearFilters(),
-                        icon: const Icon(Icons.clear_all, size: 16),
-                        label: const Text('Clear All'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.red[600],
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-              Expanded(
-                child: doctorProvider.isLoading
+                const SizedBox(height: 32),
+                if (doctorProvider.hasActiveFilters)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (doctorProvider.searchQuery.isNotEmpty)
+                          FilterChip(
+                            onSelected: (value) {
+                              doctorProvider.searchDoctors(
+                                  value ? doctorProvider.searchQuery : '');
+                            },
+                            label:
+                                Text('Search: "${doctorProvider.searchQuery}"'),
+                            onDeleted: () => doctorProvider.clearSearch(),
+                            deleteIcon: const Icon(Icons.close, size: 16),
+                          ),
+                        if (doctorProvider.selectedLocation.isNotEmpty)
+                          FilterChip(
+                            onSelected: (value) {
+                              doctorProvider.filterByLocation(
+                                  value ? doctorProvider.selectedLocation : '');
+                            },
+                            label: Text(
+                                'Location: "${doctorProvider.selectedLocation}"'),
+                            onDeleted: () =>
+                                doctorProvider.clearLocationFilter(),
+                            deleteIcon: const Icon(Icons.close, size: 16),
+                          ),
+                        TextButton.icon(
+                          onPressed: () => doctorProvider.clearFilters(),
+                          icon: const Icon(Icons.clear_all, size: 16),
+                          label: const Text('Clear All'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.red[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                doctorProvider.isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: Color(0xFF4CAF50),
@@ -222,20 +226,24 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                               ],
                             ),
                           )
-                        : SingleChildScrollView(
-                            child: Wrap(
-                              spacing: 16.0,
-                              runSpacing: 16.0,
-                              children: doctorProvider.filteredDoctors
-                                  .map((doctor) => SizedBox(
-                                        width: isMobile ? size.width - 64 : 380,
-                                        child: DoctorCard(doctor: doctor),
-                                      ))
-                                  .toList(),
-                            ),
+                        : Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.start,
+                            spacing: 16.0,
+                            runSpacing: 16.0,
+                            children: doctorProvider.filteredDoctors
+                                .map((doctor) => SizedBox(
+                                      width: isMobile ? size.width - 64 : 380,
+                                      child: DoctorCard(doctor: doctor),
+                                    ))
+                                .toList(),
                           ),
-              )
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                const FooterSection(),
+              ],
+            ),
           );
         },
       ),
