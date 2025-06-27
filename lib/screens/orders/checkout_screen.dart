@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/order_item_model.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/const/toaster.dart';
 import 'package:provider/provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/backend/providers/checkout_provider.dart';
 import 'package:pelviease_website/const/enums/payment_enum.dart';
+import 'package:toastification/toastification.dart';
 import 'widgets/add_address_dialog.dart';
 
 // Custom class to track CartItem and checkout status
@@ -649,17 +651,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ? null
                             : () async {
                                 if (checkoutProvider.selectedAddress == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                          'Please select a delivery address'),
-                                      backgroundColor: Colors.orange,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                  );
+                                  showCustomToast(
+                                      title: "Select Address",
+                                      description:
+                                          "Please select a delivery address",
+                                      type: ToastificationType.info);
                                   return;
                                 }
                                 String? userId = widget.userId.trim().isNotEmpty
@@ -702,24 +698,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   for (var item in selectedItems) {
                                     await cartProvider.removeItem(item.id);
                                   }
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          const Icon(Icons.check_circle,
-                                              color: Colors.white),
-                                          const SizedBox(width: 12),
-                                          const Text(
-                                              'Order placed successfully!'),
-                                        ],
-                                      ),
-                                      backgroundColor: Colors.green,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                  );
+                                  showCustomToast(
+                                      title: "Order Confirmed",
+                                      description: "Order placed successfully!",
+                                      type: ToastificationType.success);
                                   context.go("/orders");
                                 }
                               },
