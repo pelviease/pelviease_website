@@ -252,7 +252,7 @@ class _RightCarousel extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
-                        width: isMobile ? 200 : 500,
+                        width: isMobile ? MediaQuery.of(context).size.width / 2.6 : MediaQuery.of(context).size.width / 2.6,
                         child: Text(
                           product['description'] ?? '',
                           style: Theme.of(context)
@@ -315,10 +315,10 @@ class _RightCarousel extends StatelessWidget {
                     isMobile ? Alignment.bottomRight : Alignment.centerRight,
                 child: Image.asset(
                   product['image'] ?? '',
-                  height: isMobile
-                      ? (product['image'] == 'product3.png' ? 120 : 160)
-                      : 480,
-                  width: isMobile ? 90 : 280,
+
+
+                  width: isMobile ? (product['image'] == 'product3.png' ? 80 : 80) : 228,
+
                 ),
               ),
             ],
