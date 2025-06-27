@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pelviease_website/widgets/footer.dart';
 
 // Assuming these are your theme colors
 const Color lightcyclamen = Color(0xFFF8C8DC);
@@ -120,131 +121,147 @@ class ContactScreen extends StatelessWidget {
           ),
           child: const ContactForm(),
         ),
+        const SizedBox(
+          height: 20,
+        ),
+        const FooterSection(),
       ],
     );
   }
 
   Widget _buildDesktopLayout(BuildContext context, Size size) {
-    return Stack(
-      children: [
-        Container(
-          color: Colors.white,
-          width: size.width * 0.7,
-          height: size.height * 0.8,
-        ),
-        // Reach Out Anytime Form Box
-        Positioned(
-          right: 20,
-          top: 32,
-          child: Container(
-            width: size.width * 0.5,
-            height: size.height * 0.75,
-            decoration: BoxDecoration(
-              color: lightcyclamen,
-              borderRadius: BorderRadius.circular(42),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                SizedBox(width: size.width * 0.11),
-                Expanded(child: ContactForm()),
-              ],
-            ),
-          ),
-        ),
-        // Contact Us Box
-        Positioned(
-          left: 0,
-          top: 46,
-          bottom: 24,
-          child: Container(
-            width: size.width * 0.3,
-            decoration: BoxDecoration(
-              color: Color(0xFF483149),
-              borderRadius: BorderRadius.circular(42),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'Contact Us',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              Container(
+                color: Colors.white,
+                width: size.width * 0.7,
+                height: size.height * 0.8,
+              ),
+              // Reach Out Anytime Form Box
+              Positioned(
+                right: 20,
+                top: 32,
+                child: Container(
+                  width: size.width * 0.5,
+                  height: size.height * 0.75,
+                  decoration: BoxDecoration(
+                    color: lightcyclamen,
+                    borderRadius: BorderRadius.circular(42),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      SizedBox(width: size.width * 0.11),
+                      Expanded(child: ContactForm()),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const Icon(Icons.phone, color: Colors.white, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '+91 91826 64777',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.email, color: Colors.white, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'techarinoinnovpvtltd@gmail.com',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.location_on,
-                        color: Colors.white, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'H.NO. 7-1-302/45/4, 5th Floor B.K. Gutta, Sanjeev Reddy Nagar, Ameerpet, Hyderabad-500038, Telangana',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 120,
-                  child: Image.asset(
-                    'assets/images/contactus.png',
-                    height: 80,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 80,
-                        width: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
+              ),
+              // Contact Us Box
+              Positioned(
+                left: 0,
+                top: 46,
+                bottom: 24,
+                child: Container(
+                  width: size.width * 0.3,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF483149),
+                    borderRadius: BorderRadius.circular(42),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Contact Us',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: const Icon(Icons.image, color: Colors.white),
-                      );
-                    },
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '+91 91826 64777',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Icon(Icons.email,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'techarinoinnovpvtltd@gmail.com',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.location_on,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'H.NO. 7-1-302/45/4, 5th Floor B.K. Gutta, Sanjeev Reddy Nagar, Ameerpet, Hyderabad-500038, Telangana',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 120,
+                        child: Image.asset(
+                          'assets/images/contactus.png',
+                          height: 80,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 80,
+                              width: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child:
+                                  const Icon(Icons.image, color: Colors.white),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const FooterSection(),
+        ],
+      ),
     );
   }
 }

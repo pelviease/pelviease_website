@@ -18,8 +18,8 @@ class CartProvider with ChangeNotifier {
   double get subtotal =>
       _cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
   double get shipping => 0.00;
-  double get couponDiscount => 0.00;
-  double get total => subtotal + shipping - couponDiscount;
+  double get discount => 0.00;
+  double get total => subtotal + shipping - discount;
   int get itemCount => _cartItems.fold(0, (sum, item) => sum + item.quantity);
 
   // Fetch cart items
