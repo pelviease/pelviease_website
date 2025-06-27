@@ -197,6 +197,7 @@ class OrderDetails {
   final String? deliveryCode;
   final String? deliveredBy;
   final String? trackingUrl;
+  final double discount;
 
   OrderDetails({
     this.id,
@@ -210,6 +211,7 @@ class OrderDetails {
     required this.total,
     required this.deliveryAddress,
     required this.paymentMethod,
+    required this.discount,
     this.status = OrderStatus.pending,
     DateTime? orderDate,
     DateTime? updatedAt,
@@ -272,6 +274,7 @@ class OrderDetails {
       'deliveryCode': deliveryCode,
       'deliveredBy': deliveredBy,
       'trackingUrl': trackingUrl,
+      'discount': discount,
     };
   }
 
@@ -293,60 +296,62 @@ class OrderDetails {
     }
 
     return OrderDetails(
-      id: docId,
-      userId: data['userId'] ?? '',
-      userName: data['userName'] ?? '',
-      userFcmToken: data['userFcmToken'] ?? '',
-      items: (data['items'] as List<dynamic>?)
-              ?.map((item) => OrderItem.fromMap(item))
-              .toList() ??
-          [],
-      subtotal: (data['subtotal'] ?? 0.0).toDouble(),
-      tax: (data['tax'] ?? 0.0).toDouble(),
-      shippingCost: (data['shippingCost'] ?? 0.0).toDouble(),
-      total: (data['total'] ?? 0.0).toDouble(),
-      deliveryAddress: DeliveryAddress.fromMap(
-          data['deliveryAddress'] as Map<String, dynamic>? ?? {}),
-      paymentMethod: PaymentType.fromString(data['paymentMethod'] ?? 'Cash'),
-      status: OrderStatus.fromString(data['status'] ?? 'Pending'),
-      orderDate: (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      statusHistory: statusHistory,
-      estimatedDeliveryDate:
-          (data['estimatedDeliveryDate'] as Timestamp?)?.toDate(),
-      deliveryPersonId: data['deliveryPersonId'],
-      deliveryCode: data['deliveryCode'],
-      deliveredBy: data['deliveredBy'],
-      trackingUrl: data['trackingUrl'],
-    );
+        id: docId,
+        userId: data['userId'] ?? '',
+        userName: data['userName'] ?? '',
+        userFcmToken: data['userFcmToken'] ?? '',
+        items: (data['items'] as List<dynamic>?)
+                ?.map((item) => OrderItem.fromMap(item))
+                .toList() ??
+            [],
+        subtotal: (data['subtotal'] ?? 0.0).toDouble(),
+        tax: (data['tax'] ?? 0.0).toDouble(),
+        shippingCost: (data['shippingCost'] ?? 0.0).toDouble(),
+        total: (data['total'] ?? 0.0).toDouble(),
+        deliveryAddress: DeliveryAddress.fromMap(
+            data['deliveryAddress'] as Map<String, dynamic>? ?? {}),
+        paymentMethod: PaymentType.fromString(data['paymentMethod'] ?? 'Cash'),
+        status: OrderStatus.fromString(data['status'] ?? 'Pending'),
+        orderDate:
+            (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        updatedAt:
+            (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        statusHistory: statusHistory,
+        estimatedDeliveryDate:
+            (data['estimatedDeliveryDate'] as Timestamp?)?.toDate(),
+        deliveryPersonId: data['deliveryPersonId'],
+        deliveryCode: data['deliveryCode'],
+        deliveredBy: data['deliveredBy'],
+        trackingUrl: data['trackingUrl'],
+        discount: data['discount']);
   }
 
-  factory OrderDetails.fromCartItems({
-    required String id,
-    required String userId,
-    required String userName,
-    required String userFcmToken,
-    required List<CartItem> cartItems,
-    required double subtotal,
-    required double tax,
-    required double shippingCost,
-    required double total,
-    required DeliveryAddress deliveryAddress,
-    required PaymentType paymentMethod,
-  }) {
+  factory OrderDetails.fromCartItems(
+      {required String id,
+      required String userId,
+      required String userName,
+      required String userFcmToken,
+      required List<CartItem> cartItems,
+      required double subtotal,
+      required double tax,
+      required double shippingCost,
+      required double total,
+      required DeliveryAddress deliveryAddress,
+      required PaymentType paymentMethod,
+      required discount}) {
     return OrderDetails(
-      id: id,
-      userId: userId,
-      userName: userName,
-      userFcmToken: userFcmToken,
-      items: cartItems.map((item) => OrderItem.fromCartItem(item)).toList(),
-      subtotal: subtotal,
-      tax: tax,
-      shippingCost: shippingCost,
-      total: total,
-      deliveryAddress: deliveryAddress,
-      paymentMethod: paymentMethod,
-    );
+        id: id,
+        userId: userId,
+        userName: userName,
+        userFcmToken: userFcmToken,
+        items: cartItems.map((item) => OrderItem.fromCartItem(item)).toList(),
+        subtotal: subtotal,
+        tax: tax,
+        shippingCost: shippingCost,
+        total: total,
+        deliveryAddress: deliveryAddress,
+        paymentMethod: paymentMethod,
+        discount: discount);
   }
 
   OrderDetails updateStatus(OrderStatus newStatus, {String? comment}) {
@@ -393,29 +398,30 @@ class OrderDetails {
     String? deliveryCode,
     String? deliveredBy,
     String? trackingUrl,
+    double? discount,
   }) {
     return OrderDetails(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      userName: userName ?? this.userName,
-      userFcmToken: userFcmToken ?? this.userFcmToken,
-      items: items ?? this.items,
-      subtotal: subtotal ?? this.subtotal,
-      tax: tax ?? this.tax,
-      shippingCost: shippingCost ?? this.shippingCost,
-      total: total ?? this.total,
-      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      status: status ?? this.status,
-      orderDate: orderDate ?? this.orderDate,
-      updatedAt: updatedAt ?? this.updatedAt,
-      statusHistory: statusHistory ?? this.statusHistory,
-      estimatedDeliveryDate:
-          estimatedDeliveryDate ?? this.estimatedDeliveryDate,
-      deliveryPersonId: deliveryPersonId ?? this.deliveryPersonId,
-      deliveryCode: deliveryCode ?? this.deliveryCode,
-      deliveredBy: deliveredBy ?? this.deliveredBy,
-      trackingUrl: trackingUrl ?? this.trackingUrl,
-    );
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        userName: userName ?? this.userName,
+        userFcmToken: userFcmToken ?? this.userFcmToken,
+        items: items ?? this.items,
+        subtotal: subtotal ?? this.subtotal,
+        tax: tax ?? this.tax,
+        shippingCost: shippingCost ?? this.shippingCost,
+        total: total ?? this.total,
+        deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+        paymentMethod: paymentMethod ?? this.paymentMethod,
+        status: status ?? this.status,
+        orderDate: orderDate ?? this.orderDate,
+        updatedAt: updatedAt ?? this.updatedAt,
+        statusHistory: statusHistory ?? this.statusHistory,
+        estimatedDeliveryDate:
+            estimatedDeliveryDate ?? this.estimatedDeliveryDate,
+        deliveryPersonId: deliveryPersonId ?? this.deliveryPersonId,
+        deliveryCode: deliveryCode ?? this.deliveryCode,
+        deliveredBy: deliveredBy ?? this.deliveredBy,
+        trackingUrl: trackingUrl ?? this.trackingUrl,
+        discount: discount ?? this.discount);
   }
 }

@@ -6,7 +6,6 @@ import 'package:pelviease_website/backend/providers/order_item_provider.dart';
 import 'package:pelviease_website/const/enums/order_status.dart';
 import 'package:pelviease_website/const/url_launcher.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -559,6 +558,8 @@ class OrderCard extends StatelessWidget {
                       _buildSummaryRow('Tax', order.tax),
                       const SizedBox(height: 8),
                       _buildSummaryRow('Shipping', order.shippingCost),
+                      const SizedBox(height: 8),
+                      _buildSummaryRow('Discount', order.discount),
                       const Divider(height: 20),
                       _buildSummaryRow('Total', order.total, isTotal: true),
                     ],
