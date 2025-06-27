@@ -52,7 +52,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         child: Row(
           children: [
             Container(
-              width: 280,
+              width: 320,
               padding: const EdgeInsets.all(32.0),
               decoration: const BoxDecoration(
                 color: buttonColor,
@@ -68,12 +68,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   const SizedBox(
                     height: 45,
                   ),
-                  const Text(
-                    'Profile',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  Center(
+                    child: const Text(
+                      'Profile',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -89,6 +91,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                           authProvider.user!.name.isEmpty)
                       ? const SizedBox.shrink()
                       : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Name',
@@ -628,7 +631,8 @@ class OrderCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       _buildSummaryRow('Shipping', order.shippingCost),
                       const SizedBox(height: 8),
-                      _buildSummaryRow('Discount', order.discount),
+                      if (order.discount != null && order.discount! > 0)
+                        _buildSummaryRow('Discount', order.discount!),
                       const Divider(height: 20),
                       _buildSummaryRow('Total', order.total, isTotal: true),
                     ],

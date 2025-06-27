@@ -23,6 +23,7 @@ class OrderService {
       }
 
       final snapshot = await query.get();
+
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return OrderDetails.fromFirestore(data, doc.id);

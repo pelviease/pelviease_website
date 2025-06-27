@@ -197,7 +197,7 @@ class OrderDetails {
   final String? deliveryCode;
   final String? deliveredBy;
   final String? trackingUrl;
-  final double discount;
+  final double? discount;
 
   OrderDetails({
     this.id,
@@ -211,7 +211,7 @@ class OrderDetails {
     required this.total,
     required this.deliveryAddress,
     required this.paymentMethod,
-    required this.discount,
+    this.discount,
     this.status = OrderStatus.pending,
     DateTime? orderDate,
     DateTime? updatedAt,
@@ -279,23 +279,24 @@ class OrderDetails {
   }
 
   factory OrderDetails.fromFirestore(Map<String, dynamic> data, String docId) {
-    List<StatusChange> statusHistory = [];
-    if (data['statusHistory'] != null) {
-      statusHistory = (data['statusHistory'] as List<dynamic>)
-          .map((item) => StatusChange.fromMap(item))
-          .toList();
-    } else {
-      statusHistory = [
-        StatusChange(
-          status: OrderStatus.fromString(data['status'] ?? 'Pending'),
-          timestamp:
-              (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          comment: 'Order created',
-        ),
-      ];
-    }
+    try {
+      List<StatusChange> statusHistory = [];
+      if (data['statusHistory'] != null) {
+        statusHistory = (data['statusHistory'] as List<dynamic>)
+            .map((item) => StatusChange.fromMap(item))
+            .toList();
+      } else {
+        statusHistory = [
+          StatusChange(
+            status: OrderStatus.fromString(data['status'] ?? 'Pending'),
+            timestamp:
+                (data['orderDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            comment: 'Order created',
+          ),
+        ];
+      }
 
-    return OrderDetails(
+      return OrderDetails(
         id: docId,
         userId: data['userId'] ?? '',
         userName: data['userName'] ?? '',
@@ -323,9 +324,44 @@ class OrderDetails {
         deliveryCode: data['deliveryCode'],
         deliveredBy: data['deliveredBy'],
         trackingUrl: data['trackingUrl'],
-        discount: data['discount']);
+        discount: data['discount'],
+      );
+    } catch (e) {
+      return OrderDetails(
+        id: docId,
+        userId: '',
+        userName: '',
+        userFcmToken: '',
+        items: [],
+        subtotal: 0.0,
+        tax: 0.0,
+        shippingCost: 0.0,
+        total: 0.0,
+        deliveryAddress: DeliveryAddress(
+          id: '',
+          fullName: '',
+          phoneNumber: '',
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          country: '',
+        ),
+        paymentMethod: PaymentType.cash,
+        status: OrderStatus.pending,
+        orderDate: DateTime.now(),
+        updatedAt: DateTime.now(),
+        statusHistory: [],
+        estimatedDeliveryDate: null,
+        deliveryPersonId: null,
+        deliveryCode: null,
+        deliveredBy: null,
+        trackingUrl: null,
+        discount: 0.0,
+      );
+    }
   }
-
   factory OrderDetails.fromCartItems(
       {required String id,
       required String userId,

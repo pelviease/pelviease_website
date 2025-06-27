@@ -45,18 +45,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Color get textSecondaryColor =>
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
-  // List to track cart items and their checkout status
   late List<CheckoutItem> _checkoutItems;
 
   @override
   void initState() {
     super.initState();
     Provider.of<CheckoutProvider>(context, listen: false).fetchAddresses();
-    // Initialize checkout items with all cart items checked by default
-    _checkoutItems = Provider.of<CartProvider>(context, listen: false)
-        .cartItems
-        .map((item) => CheckoutItem(cartItem: item))
-        .toList();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final cartItems = Provider.of<CartProvider>(context).cartItems;
+    setState(() {
+      _checkoutItems =
+          cartItems.map((item) => CheckoutItem(cartItem: item)).toList();
+    });
   }
 
   void _toggleItemSelection(int index) {
@@ -391,6 +395,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       onChanged: (value) => _toggleItemSelection(index),
                       activeColor: primaryColor,
                     ),
+                    SizedBox(
+                      width: 12,
+                    ),
                     Container(
                       width: 50,
                       height: 50,
@@ -398,12 +405,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         color: accentColor.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: item.cartItem.image != null &&
-                              item.cartItem.image!.isNotEmpty
+                      child: item.cartItem.image.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
-                                item.cartItem.image!,
+                                item.cartItem.image,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
                                     Icon(

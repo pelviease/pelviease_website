@@ -295,12 +295,12 @@ class _ContactFormState extends State<ContactForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      print('Name: ${_nameController.text}');
-      print('Phone: ${_phoneController.text}');
-      print('Email: ${_emailController.text}');
-      print('Company: ${_companyController.text}');
-      print('Subject: ${_subjectController.text}');
-      print('Question: ${_questionController.text}');
+      // print('Name: ${_nameController.text}');
+      // print('Phone: ${_phoneController.text}');
+      // print('Email: ${_emailController.text}');
+      // print('Company: ${_companyController.text}');
+      // print('Subject: ${_subjectController.text}');
+      // print('Question: ${_questionController.text}');
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Form submitted successfully!')),
