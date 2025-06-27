@@ -76,8 +76,8 @@ class _ProductHighlightSectionState extends State<ProductHighlightSection> {
                 _LeftCard(isMobile),
                 const SizedBox(height: 24),
                 SizedBox(
-                  height: 300,
-                  child: _RightCarousel(_controller, _products, isMobile)),
+                    height: 300,
+                    child: _RightCarousel(_controller, _products, isMobile)),
                 const SizedBox(height: 16),
                 _buildDots(),
               ],
@@ -99,7 +99,8 @@ class _ProductHighlightSectionState extends State<ProductHighlightSection> {
                       children: [
                         SizedBox(
                           height: 350,
-                          child: _RightCarousel(_controller, _products, isMobile),
+                          child:
+                              _RightCarousel(_controller, _products, isMobile),
                         ),
                         _buildDots(),
                       ],
@@ -149,12 +150,11 @@ class _LeftCard extends StatelessWidget {
                 child: Text(
                   'OUR\nPRODUCTS',
                   style: TextStyle(
-                    fontSize: isMobile ? 32 : 48,
-                    fontWeight: FontWeight.bold,
-                    color: darkViolet,
-                    letterSpacing: 2,
-                    height: 0.9
-                  ),
+                      fontSize: isMobile ? 32 : 48,
+                      fontWeight: FontWeight.bold,
+                      color: darkViolet,
+                      letterSpacing: 2,
+                      height: 0.9),
                 ),
               ),
             ),
@@ -165,14 +165,13 @@ class _LeftCard extends StatelessWidget {
             child: Text(
               'OUR\nPRODUCTS\nOUR\nPRODUCTS\nOUR\nPRODUCTS',
               style: TextStyle(
-                fontSize: isMobile ? 32 : 48,
-                fontWeight: FontWeight.bold,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = .8
-                  ..color = darkViolet.withAlpha(100),
-                height: 1
-              ),
+                  fontSize: isMobile ? 32 : 48,
+                  fontWeight: FontWeight.bold,
+                  foreground: Paint()
+                    ..style = PaintingStyle.stroke
+                    ..strokeWidth = .8
+                    ..color = darkViolet.withAlpha(100),
+                  height: 1),
             ),
           ),
           Positioned(
@@ -232,9 +231,9 @@ class _RightCarousel extends StatelessWidget {
       itemBuilder: (context, index) {
         final product = products[index];
         return Padding(
-          padding: isMobile ? EdgeInsets.all(12) : EdgeInsets.all(24),
+          padding: isMobile ? EdgeInsets.all(0) : EdgeInsets.all(24),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +258,9 @@ class _RightCarousel extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
-                              ?.copyWith(fontSize: isMobile ? 14 : 20, color: Colors.black87),
+                              ?.copyWith(
+                                  fontSize: isMobile ? 14 : 20,
+                                  color: Colors.black87),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -310,10 +311,14 @@ class _RightCarousel extends StatelessWidget {
                 ],
               ),
               Align(
-                alignment: isMobile ? Alignment.bottomRight : Alignment.centerRight,
+                alignment:
+                    isMobile ? Alignment.bottomRight : Alignment.centerRight,
                 child: Image.asset(
                   product['image'] ?? '',
+
+
                   width: isMobile ? (product['image'] == 'product3.png' ? 80 : 80) : 228,
+
                 ),
               ),
             ],

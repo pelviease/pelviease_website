@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/order_item_model.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,14 @@ import 'package:pelviease_website/backend/providers/cart_provider.dart';
 import 'package:pelviease_website/backend/providers/checkout_provider.dart';
 import 'package:pelviease_website/const/enums/payment_enum.dart';
 import 'widgets/add_address_dialog.dart';
+
+// Custom class to track CartItem and checkout status
+class CheckoutItem {
+  final CartItem cartItem;
+  bool isCheckedOut;
+
+  CheckoutItem({required this.cartItem, this.isCheckedOut = true});
+}
 
 class CheckoutScreen extends StatefulWidget {
   final String userId;
@@ -36,10 +45,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Color get textSecondaryColor =>
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
+  // List to track cart items and their checkout status
+  late List<CheckoutItem> _checkoutItems;
+
   @override
   void initState() {
     super.initState();
     Provider.of<CheckoutProvider>(context, listen: false).fetchAddresses();
+    // Initialize checkout items with all cart items checked by default
+    _checkoutItems = Provider.of<CartProvider>(context, listen: false)
+        .cartItems
+        .map((item) => CheckoutItem(cartItem: item))
+        .toList();
+  }
+
+  void _toggleItemSelection(int index) {
+    setState(() {
+      _checkoutItems[index].isCheckedOut = !_checkoutItems[index].isCheckedOut;
+    });
+  }
+
+  // Calculate totals for selected items only
+  double _calculateSubtotal(List<CheckoutItem> items) {
+    return items.where((item) => item.isCheckedOut).fold(
+        0.0, (sum, item) => sum + item.cartItem.price * item.cartItem.quantity);
+  }
+
+  double _calculateShipping(List<CheckoutItem> items) {
+    // Match CheckoutProvider logic: fixed $5.0 shipping
+    return items.any((item) => item.isCheckedOut) ? 5.0 : 0.0;
+  }
+
+  double _calculateTax(List<CheckoutItem> items) {
+    // Match CheckoutProvider logic: 10% tax on subtotal
+    return _calculateSubtotal(items) * 0.1;
+  }
+
+  double _calculateDiscount(CartProvider cartProvider) {
+    // Use CartProvider's discount for selected items
+    return cartProvider.discount;
+  }
+
+  double _calculateTotal(List<CheckoutItem> items, CartProvider cartProvider) {
+    return _calculateSubtotal(items) +
+        _calculateShipping(items) +
+        _calculateTax(items) -
+        _calculateDiscount(cartProvider);
   }
 
   void showAddAddressDialog(BuildContext context) {
@@ -310,9 +361,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         children: [
           _buildSectionHeader('Order Summary', Icons.shopping_cart),
           const SizedBox(height: 20),
-
-          // Cart Items
-          ...cartProvider.cartItems.map((item) => Container(
+          // Cart Items with Checkboxes
+          if (_checkoutItems.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'No items in cart',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textSecondaryColor,
+                ),
+              ),
+            )
+          else
+            ..._checkoutItems.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -321,6 +386,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 child: Row(
                   children: [
+                    Checkbox(
+                      value: item.isCheckedOut,
+                      onChanged: (value) => _toggleItemSelection(index),
+                      activeColor: primaryColor,
+                    ),
                     Container(
                       width: 50,
                       height: 50,
@@ -328,10 +398,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         color: accentColor.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        Icons.shopping_bag,
-                        color: primaryColor,
-                      ),
+                      child: item.cartItem.image != null &&
+                              item.cartItem.image!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                item.cartItem.image!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(
+                                  Icons.shopping_bag,
+                                  color: primaryColor,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.shopping_bag,
+                              color: primaryColor,
+                            ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -339,14 +423,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item.productName,
+                            item.cartItem.productName,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: textPrimaryColor,
                             ),
                           ),
                           Text(
-                            'Quantity: ${item.quantity}',
+                            'Quantity: ${item.cartItem.quantity}',
                             style: TextStyle(
                               fontSize: 12,
                               color: textSecondaryColor,
@@ -356,7 +440,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     Text(
-                      '₹ ${(item.price * item.quantity).toStringAsFixed(2)}',
+                      '₹ ${(item.cartItem.price * item.cartItem.quantity).toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: primaryColor,
@@ -365,8 +449,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ],
                 ),
-              )),
-
+              );
+            }),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
@@ -376,11 +460,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             child: Column(
               children: [
-                _buildSummaryRow('Subtotal', cartProvider.subtotal),
-                _buildSummaryRow('Shipping', cartProvider.shipping),
-                _buildSummaryRow('Discount', -cartProvider.couponDiscount),
+                _buildSummaryRow(
+                    'Subtotal', _calculateSubtotal(_checkoutItems)),
+                _buildSummaryRow(
+                    'Shipping', _calculateShipping(_checkoutItems)),
+                _buildSummaryRow('Tax', _calculateTax(_checkoutItems)),
+                _buildSummaryRow('Discount', -_calculateDiscount(cartProvider)),
                 const Divider(height: 24),
-                _buildSummaryRow('Total', cartProvider.total, isTotal: true),
+                _buildSummaryRow(
+                    'Total', _calculateTotal(_checkoutItems, cartProvider),
+                    isTotal: true),
               ],
             ),
           ),
@@ -454,12 +543,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     bool isMobile = size.width < 600;
     return Scaffold(
       backgroundColor: backgroundColor,
-      // appBar: AppBar(
-      //   title: const Text('Checkout'),
-      //   backgroundColor: surfaceColor,
-      //   elevation: 0,
-      //   foregroundColor: textPrimaryColor,
-      // ),
       body: checkoutProvider.isLoading
           ? Center(
               child: Column(
@@ -501,15 +584,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                         if (isMobile) ...[
                           _buildDeliveryAddressSection(checkoutProvider),
-                          SizedBox(
-                            height: 16,
-                          ),
+                          const SizedBox(height: 16),
                           _buildPaymentMethodSection(checkoutProvider),
                         ],
-
                         const SizedBox(height: 20),
                         _buildOrderSummarySection(cartProvider),
-
                         // Error Message
                         if (checkoutProvider.errorMessage != null)
                           Container(
@@ -536,13 +615,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ],
                             ),
                           ),
-
                         const SizedBox(height: 100), // Space for bottom button
                       ],
                     ),
                   ),
                 ),
-
                 // Bottom Place Order Button
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -560,7 +637,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: checkoutProvider.isLoading
+                        onPressed: checkoutProvider.isLoading ||
+                                _checkoutItems
+                                    .every((item) => !item.isCheckedOut)
                             ? null
                             : () async {
                                 if (checkoutProvider.selectedAddress == null) {
@@ -577,7 +656,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   );
                                   return;
                                 }
-
                                 String? userId = widget.userId.trim().isNotEmpty
                                     ? widget.userId
                                     : null;
@@ -589,7 +667,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     widget.phoneNumber.trim().isNotEmpty
                                         ? widget.phoneNumber
                                         : null;
-
                                 if (userId == null ||
                                     userName == null ||
                                     phoneNumber == null) {
@@ -601,23 +678,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   phoneNumber ??=
                                       authProvider.user?.phoneNumber ?? '';
                                 }
-
+                                final selectedItems = _checkoutItems
+                                    .where((item) => item.isCheckedOut)
+                                    .map((item) => item.cartItem)
+                                    .toList();
                                 final success =
                                     await checkoutProvider.placeOrder(
-                                  cartItems: cartProvider.cartItems,
+                                  cartItems: selectedItems,
                                   userId: userId,
                                   userName: userName,
                                   phoneNumber: phoneNumber,
                                   userFcmToken: "",
+                                  discount: cartProvider.discount,
                                 );
-
                                 if (success) {
-                                  await cartProvider.clearCart();
+                                  // Remove only selected items from cart
+                                  for (var item in selectedItems) {
+                                    await cartProvider.removeItem(item.id);
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Row(
                                         children: [
-                                          Icon(Icons.check_circle,
+                                          const Icon(Icons.check_circle,
                                               color: Colors.white),
                                           const SizedBox(width: 12),
                                           const Text(
@@ -649,7 +732,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             const Icon(Icons.shopping_cart_checkout),
                             const SizedBox(width: 8),
                             Text(
-                              'Place Order • ₹ ${cartProvider.total.toStringAsFixed(2)}',
+                              'Place Order • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

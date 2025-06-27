@@ -77,6 +77,7 @@ class CheckoutProvider with ChangeNotifier {
     required String userName,
     required String phoneNumber,
     required String userFcmToken,
+    required double discount,
   }) async {
     if (_selectedAddress == null) {
       _errorMessage = 'Please select a delivery address';
@@ -102,7 +103,7 @@ class CheckoutProvider with ChangeNotifier {
       const taxRate = 0.1;
       const shippingCost = 5.0;
       final tax = subtotal * taxRate;
-      final total = subtotal + tax + shippingCost;
+      final total = subtotal + tax + shippingCost - discount;
 
       // Create OrderDetails from cart items
       final orderDetails = OrderDetails.fromCartItems(
@@ -114,6 +115,7 @@ class CheckoutProvider with ChangeNotifier {
         subtotal: subtotal,
         tax: tax,
         shippingCost: shippingCost,
+        discount: discount,
         total: total,
         deliveryAddress: _selectedAddress!,
         paymentMethod: _selectedPaymentType,
