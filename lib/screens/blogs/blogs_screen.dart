@@ -49,7 +49,7 @@ class BlogsScreenState extends State<BlogsScreen>
           child: SizedBox(
             width: size.width,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Our Latest Blogs",
@@ -174,29 +174,38 @@ class BlogsScreenState extends State<BlogsScreen>
           return const Center(
             child: Text(
               'No blogs available',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: textColor),
             ),
           );
         }
         final blogs = filter(snapshot.data!);
-        return SingleChildScrollView(
-          child: Wrap(
-            spacing: isMobile ? 16 : 24,
-            runSpacing: isMobile ? 16 : 24,
-            alignment: WrapAlignment.start,
-            children: blogs.map((blog) {
-              final cardWidth = isMobile
-                  ? size.width - 32
-                  : isTablet
-                      ? (size.width - 48) / 2
-                      : (size.width - 72) / 3;
-              return SizedBox(
-                width: cardWidth.clamp(300, 400),
-                child: BlogCard(blog: blog),
+        return blogs.isEmpty
+            ? const Center(
+                child: Text(
+                  'No blogs available',
+                  style: TextStyle(color: textColor),
+                ),
+              )
+            : SingleChildScrollView(
+                child: Center(
+                  child: Wrap(
+                    spacing: isMobile ? 16 : 24,
+                    runSpacing: isMobile ? 16 : 24,
+                    alignment: WrapAlignment.start,
+                    children: blogs.map((blog) {
+                      final cardWidth = isMobile
+                          ? size.width - 32
+                          : isTablet
+                              ? (size.width - 48) / 2
+                              : (size.width - 72) / 3;
+                      return SizedBox(
+                        width: cardWidth.clamp(300, 400),
+                        child: BlogCard(blog: blog),
+                      );
+                    }).toList(),
+                  ),
+                ),
               );
-            }).toList(),
-          ),
-        );
       },
     );
   }

@@ -82,8 +82,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _calculateDiscount(CartProvider cartProvider) {
-    // Use CartProvider's couponDiscount for selected items
-    return cartProvider.couponDiscount;
+    // Use CartProvider's discount for selected items
+    return cartProvider.discount;
   }
 
   double _calculateTotal(List<CheckoutItem> items, CartProvider cartProvider) {
@@ -689,7 +689,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   userName: userName,
                                   phoneNumber: phoneNumber,
                                   userFcmToken: "",
-                                  couponDiscount: cartProvider.couponDiscount,
+                                  discount: cartProvider.discount,
                                 );
                                 if (success) {
                                   // Remove only selected items from cart

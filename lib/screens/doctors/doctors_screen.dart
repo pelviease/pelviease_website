@@ -226,17 +226,19 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                               ],
                             ),
                           )
-                        : Wrap(
-                            direction: Axis.horizontal,
-                            alignment: WrapAlignment.start,
-                            spacing: 16.0,
-                            runSpacing: 16.0,
-                            children: doctorProvider.filteredDoctors
-                                .map((doctor) => SizedBox(
-                                      width: isMobile ? size.width - 64 : 380,
-                                      child: DoctorCard(doctor: doctor),
-                                    ))
-                                .toList(),
+                        : SingleChildScrollView(
+                            child: Wrap(
+                              direction: Axis.horizontal,
+                              alignment: WrapAlignment.start,
+                              spacing: 16.0,
+                              runSpacing: 16.0,
+                              children: doctorProvider.filteredDoctors
+                                  .map((doctor) => SizedBox(
+                                        width: isMobile ? size.width - 64 : 380,
+                                        child: DoctorCard(doctor: doctor),
+                                      ))
+                                  .toList(),
+                            ),
                           ),
                 const SizedBox(
                   height: 20,

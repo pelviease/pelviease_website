@@ -4,6 +4,7 @@ import 'package:pelviease_website/backend/models/order_item_model.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/order_item_provider.dart';
 import 'package:pelviease_website/const/enums/order_status.dart';
+import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/const/url_launcher.dart';
 import 'package:provider/provider.dart';
 
@@ -42,190 +43,233 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
   }
 
   Widget _buildDesktopLayout(AuthProvider authProvider) {
-    return Row(
-      children: [
-        // Sidebar
-        Container(
-          width: 280,
-          padding: const EdgeInsets.all(20.0),
-          decoration: const BoxDecoration(
-            color: Color(0xFF6B46C1),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Profile',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          color: Colors.grey[200]),
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Row(
+          children: [
+            Container(
+              width: 280,
+              padding: const EdgeInsets.all(32.0),
+              decoration: const BoxDecoration(
+                color: buttonColor,
+                // borderRadius: BorderRadius.only(
+                //   topLeft: Radius.circular(16),
+                //   bottomLeft: Radius.circular(16),
+                // ),
+                borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
-              const SizedBox(height: 24),
-              const CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.white24,
-                child: Icon(Icons.person, size: 45, color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                authProvider.user?.name ?? 'User Name',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                authProvider.user?.email ?? 'email@example.com',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.go('/login');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF6B46C1),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 45,
+                  ),
+                  const Text(
+                    'Profile',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: const CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.person, size: 45, color: Colors.white),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Orders Section
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              color: Colors.pink[50],
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'My Orders',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: FutureBuilder(
-                    future: _ordersFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF6B46C1),
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Colors.red[300],
+                  const SizedBox(height: 20),
+                  (authProvider.user?.name == null ||
+                          authProvider.user!.name.isEmpty)
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            Text(
+                              'Name',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Error loading orders',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.red[700],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${snapshot.error}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        final orders =
-                            Provider.of<OrderProvider>(context).orders;
-                        if (orders.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 80,
-                                  color: Colors.black54,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No orders found',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Your orders will appear here once you make a purchase',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
                             ),
-                          );
-                        }
-                        return ListView.builder(
-                          itemCount: orders.length,
-                          itemBuilder: (context, index) {
-                            final order = orders[index];
-                            return OrderCard(order: order);
-                          },
-                        );
-                      }
-                    },
+                            const SizedBox(height: 4),
+                            Text(
+                              authProvider.user?.name ?? 'User Name',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Email Address',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    authProvider.user?.email ?? 'email@example.com',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.go('/login');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF6B46C1),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Logout',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(
+              width: 24,
+            ),
+            // Orders Section
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(24.0),
+                decoration: BoxDecoration(
+                  color: Colors.pink[100],
+                  // borderRadius: const BorderRadius.only(
+                  //   topRight: Radius.circular(16),
+                  //   bottomRight: Radius.circular(16),
+                  // ),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'My Orders',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: FutureBuilder(
+                        future: _ordersFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF6B46C1),
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 64,
+                                    color: Colors.red[300],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Error loading orders',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.red[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${snapshot.error}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            final orders =
+                                Provider.of<OrderProvider>(context).orders;
+                            if (orders.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.shopping_bag_outlined,
+                                      size: 80,
+                                      color: Colors.black54,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No orders found',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Your orders will appear here once you make a purchase',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return ListView.builder(
+                              itemCount: orders.length,
+                              itemBuilder: (context, index) {
+                                final order = orders[index];
+                                return OrderCard(order: order);
+                              },
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -236,16 +280,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         children: [
           // Profile Section
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(32.0),
             decoration: const BoxDecoration(
-              color: Color(0xFF6B46C1),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
+              color: buttonColor,
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Profile',
@@ -255,18 +296,45 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 16),
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, size: 40, color: Colors.white),
+                const SizedBox(height: 24),
+                Center(
+                  child: const CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.white24,
+                    child: Icon(Icons.person, size: 45, color: Colors.white),
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
+                (authProvider.user?.name == null ||
+                        authProvider.user!.name.isEmpty)
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          Text(
+                            'Name',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            authProvider.user?.name ?? 'User Name',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                const SizedBox(height: 20),
                 Text(
-                  authProvider.user?.name ?? 'User Name',
+                  'Email Address',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -275,10 +343,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   authProvider.user?.email ?? 'email@example.com',
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 12,
+                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -288,7 +356,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFF6B46C1),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -307,6 +375,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
               color: Colors.pink[50],
             ),
             child: Column(
@@ -472,7 +541,7 @@ class OrderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: Colors.grey[300],
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
