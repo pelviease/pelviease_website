@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pelviease_website/const/toaster.dart';
 import 'package:pelviease_website/widgets/footer.dart';
+import 'package:toastification/toastification.dart';
 
 // Assuming these are your theme colors
 const Color lightcyclamen = Color(0xFFF8C8DC);
@@ -302,9 +304,10 @@ class _ContactFormState extends State<ContactForm> {
       // print('Subject: ${_subjectController.text}');
       // print('Question: ${_questionController.text}');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Form submitted successfully!')),
-      );
+      showCustomToast(
+          title: 'Successful',
+          type: ToastificationType.success,
+          description: 'Form submitted successfully!');
     }
   }
 

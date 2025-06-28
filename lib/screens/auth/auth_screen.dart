@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/const/toaster.dart';
 import 'package:pelviease_website/screens/auth/widgets/build_text_field.dart';
 import 'package:pelviease_website/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class AuthScreen extends StatefulWidget {
   final bool isLogin;
@@ -291,13 +293,12 @@ class _AuthScreenState extends State<AuthScreen> {
         .login(_emailController.text, _passwordController.text)
         .then((_) {
       if (authProvider.isAuthenticated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Login successful! Welcome ${authProvider.user!.name}'),
-            backgroundColor: Color(0xFF543855),
-          ),
-        );
+        showCustomToast(
+            title: 'Login Successful',
+            type: ToastificationType.success,
+            description:
+                'Login successful! Welcome ${authProvider.user!.name}');
+
         if (mounted) {
           if (context.canPop()) {
             context.pop();
@@ -306,12 +307,10 @@ class _AuthScreenState extends State<AuthScreen> {
           }
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Login failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showCustomToast(
+            title: "Login Failed",
+            type: ToastificationType.error,
+            description: "${authProvider.errorMessage ?? 'Login failed'}");
       }
     });
   }
@@ -327,13 +326,12 @@ class _AuthScreenState extends State<AuthScreen> {
     )
         .then((_) {
       if (authProvider.isAuthenticated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Signup successful! Welcome ${authProvider.user!.name}'),
-            backgroundColor: Color(0xFF543855),
-          ),
-        );
+        showCustomToast(
+            title: 'SignUp Successful',
+            type: ToastificationType.success,
+            description:
+                "Signup successful! Welcome ${authProvider.user!.name}");
+
         // Navigate to home screen
         // context.go('/home');
         if (mounted) {
@@ -344,12 +342,10 @@ class _AuthScreenState extends State<AuthScreen> {
           }
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Signup failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showCustomToast(
+            title: "SignUp Failed",
+            type: ToastificationType.error,
+            description: "${authProvider.errorMessage ?? 'Signup failed'}");
       }
     });
   }

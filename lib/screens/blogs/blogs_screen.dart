@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pelviease_website/backend/models/blog.dart';
 import 'package:pelviease_website/backend/providers/blogs_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/screens/blogs/widgets/custom_tab_bar,dart';
 import 'package:pelviease_website/widgets/footer.dart';
 import 'package:provider/provider.dart';
 import 'widgets/blog_card.dart';
@@ -13,24 +14,8 @@ class BlogsScreen extends StatefulWidget {
   BlogsScreenState createState() => BlogsScreenState();
 }
 
-class BlogsScreenState extends State<BlogsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class BlogsScreenState extends State<BlogsScreen> {
+  int _selectedTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -63,37 +48,29 @@ class BlogsScreenState extends State<BlogsScreen>
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: Container(
+                  child: SizedBox(
                     width: isMobile
-                        ? size.width - 60
+                        ? size.width - 20
                         : isTablet
                             ? size.width * 0.6
                             : size.width * 0.4,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4E1E6),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: isMobile,
-                      labelColor: backgroundColor,
-                      unselectedLabelColor: Colors.black,
-                      dividerColor: Colors.transparent,
-                      indicator: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: buttonColor,
-                      ),
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      tabs: const [
-                        Tab(text: 'All'),
-                        Tab(text: 'Our blogs'),
-                        Tab(text: 'News'),
-                        Tab(text: 'Success stories'),
+                    child: CustomTabBar(
+                      selectedIndex: _selectedTabIndex,
+                      onTabSelected: (index) {
+                        setState(() {
+                          _selectedTabIndex = index;
+                        });
+                      },
+                      tabLabels: const [
+                        'All',
+                        'Our blogs',
+                        'News',
+                        'Victories',
                       ],
+                      selectedColor: backgroundColor,
+                      unselectedColor: Colors.black,
+                      backgroundColor: const Color(0xFFF4E1E6),
+                      indicatorColor: buttonColor,
                     ),
                   ),
                 ),
@@ -103,45 +80,12 @@ class BlogsScreenState extends State<BlogsScreen>
                       ? size.height * 0.7
                       : isTablet
                           ? size.height * 0.65
-                          : size.height * 0.7,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildBlogList(
-                        blogProvider.blogsStream,
-                        (blogs) => blogs,
-                        size,
-                        isMobile,
-                        isTablet,
-                      ),
-                      _buildBlogList(
-                        blogProvider.blogsStream,
-                        (blogs) => blogs
-                            .where((blog) => blog.blogType == 'blogs')
-                            .toList(),
-                        size,
-                        isMobile,
-                        isTablet,
-                      ),
-                      _buildBlogList(
-                        blogProvider.blogsStream,
-                        (blogs) => blogs
-                            .where((blog) => blog.blogType == 'news')
-                            .toList(),
-                        size,
-                        isMobile,
-                        isTablet,
-                      ),
-                      _buildBlogList(
-                        blogProvider.blogsStream,
-                        (blogs) => blogs
-                            .where((blog) => blog.blogType == 'successStories')
-                            .toList(),
-                        size,
-                        isMobile,
-                        isTablet,
-                      ),
-                    ],
+                          : size.height * 0.5,
+                  child: _buildCurrentTabContent(
+                    blogProvider,
+                    size,
+                    isMobile,
+                    isTablet,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -152,6 +96,43 @@ class BlogsScreenState extends State<BlogsScreen>
         ),
       );
     });
+  }
+
+  Widget _buildCurrentTabContent(
+    BlogProvider blogProvider,
+    Size size,
+    bool isMobile,
+    bool isTablet,
+  ) {
+    List<Blog> Function(List<Blog>) filter;
+
+    switch (_selectedTabIndex) {
+      case 0:
+        filter = (blogs) => blogs;
+        break;
+      case 1:
+        filter =
+            (blogs) => blogs.where((blog) => blog.blogType == 'blogs').toList();
+        break;
+      case 2:
+        filter =
+            (blogs) => blogs.where((blog) => blog.blogType == 'news').toList();
+        break;
+      case 3:
+        filter = (blogs) =>
+            blogs.where((blog) => blog.blogType == 'successStories').toList();
+        break;
+      default:
+        filter = (blogs) => blogs;
+    }
+
+    return _buildBlogList(
+      blogProvider.blogsStream,
+      filter,
+      size,
+      isMobile,
+      isTablet,
+    );
   }
 
   Widget _buildBlogList(
@@ -197,9 +178,9 @@ class BlogsScreenState extends State<BlogsScreen>
                           ? size.width - 32
                           : isTablet
                               ? (size.width - 48) / 2
-                              : (size.width - 72) / 3;
+                              : (size.width - 150) / 5;
                       return SizedBox(
-                        width: cardWidth.clamp(300, 400),
+                        width: cardWidth,
                         child: BlogCard(blog: blog),
                       );
                     }).toList(),

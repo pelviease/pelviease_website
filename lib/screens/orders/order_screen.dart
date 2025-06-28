@@ -5,8 +5,10 @@ import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/order_item_provider.dart';
 import 'package:pelviease_website/const/enums/order_status.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/const/toaster.dart';
 import 'package:pelviease_website/const/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -682,11 +684,10 @@ class OrderCard extends StatelessWidget {
                         if (order.trackingUrl != null) {
                           launchURL(order.trackingUrl!);
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tracking URL not available'),
-                            ),
-                          );
+                          showCustomToast(
+                              title: "Not Available",
+                              type: ToastificationType.info,
+                              description: "Tracking URL not available");
                         }
                       },
                       style: ElevatedButton.styleFrom(
