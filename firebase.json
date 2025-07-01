@@ -1,1 +1,36 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"pelviease-website","appId":"1:1081810673966:android:235567def96f536ef81abf","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"pelviease-website","configurations":{"android":"1:1081810673966:android:235567def96f536ef81abf","web":"1:1081810673966:web:da6aec8769a3129bf81abf"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pelviease-website",
+          "appId": "1:1081810673966:android:235567def96f536ef81abf",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pelviease-website",
+          "configurations": {
+            "android": "1:1081810673966:android:235567def96f536ef81abf",
+            "web": "1:1081810673966:web:da6aec8769a3129bf81abf"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
