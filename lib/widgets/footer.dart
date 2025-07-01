@@ -233,13 +233,33 @@ class FooterSection extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '© 2025 Pelviease. All rights reserved.    Powered by @Octovu',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 12 : 14,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '© ',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 12 : 14,
+                        ),
+                      ),
+                      Text(
+                        '${DateTime.now().year}',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 12 : 14,
+                        ),
+                      ),
+                      Text(
+                        ' Pelviease. All rights reserved.    Powered by @Octovu',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 12 : 14,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
                   _buildSocialIcons(screenWidth, isMobile),
