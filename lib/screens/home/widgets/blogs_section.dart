@@ -57,25 +57,24 @@ class _BlogsSectionState extends State<BlogsSection> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            Center(
-              child: SizedBox(
-                height: 380,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: blogProvider.blogs.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 20),
-                  itemBuilder: (context, index) {
-                    final blog = blogProvider.blogs[index];
-                    return BlogCard(
-                      postUrl: blog.postUrl,
-                      imagePath: blog.thumbnailUrl,
-                      title: blog.title,
-                      subtitle: blog.description,
-                      date: DateFormat('dd-MM-yyyy').format(blog.timestamp),
-                    );
-                  },
-                ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 380,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: blogProvider.blogs.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 20),
+                itemBuilder: (context, index) {
+                  final blog = blogProvider.blogs[index];
+                  return BlogCard(
+                    postUrl: blog.postUrl,
+                    imagePath: blog.thumbnailUrl,
+                    title: blog.title,
+                    subtitle: blog.description,
+                    date: DateFormat('dd-MM-yyyy').format(blog.timestamp),
+                  );
+                },
               ),
             ),
           ],

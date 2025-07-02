@@ -319,7 +319,7 @@ class _RightCarousel extends StatelessWidget {
                     isMobile ? Alignment.bottomRight : Alignment.centerRight,
                 child: Image.network(
                   product.images.first,
-                  width: isMobile ? screenWidth * 0.25 : screenWidth * 0.17,
+                  width: isMobile ? screenWidth * 0.345 : screenWidth * 0.17,
                   errorBuilder: (context, error, stackTrace) => Container(
                     width: isMobile ? 80 : screenWidth * 0.17,
                     height: isMobile ? 80 : screenWidth * 0.17,

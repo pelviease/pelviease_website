@@ -8,20 +8,20 @@ class HeroCardOne extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 600;
     return Container(
-      margin: EdgeInsets.all(10),
-      height: screenHeight - 120,
+      height: isMobile ? screenHeight - 120 : screenHeight * 0.5,
       width: screenWidth < 400 ? screenWidth : screenWidth - 16,
       decoration: BoxDecoration(
           color: buttonColor, borderRadius: BorderRadius.circular(40)),
       child: Stack(
         children: [
           Positioned(
-              top: screenWidth * 0.06,
+              top: screenHeight * 0.06,
               left: screenWidth * 0.06,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: screenWidth * 0.08,
+                spacing: isMobile ? screenWidth * 0.03 : screenWidth * 0.02,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,10 +36,9 @@ class HeroCardOne extends StatelessWidget {
                                     .textTheme
                                     .displayLarge
                                     ?.copyWith(
-                                      //fontSize: screenWidth * 0.045,
-                                      fontSize: screenWidth > 600
-                                          ? screenWidth * 0.05
-                                          : screenWidth * 0.09,
+                                      fontSize: isMobile
+                                          ? screenWidth * 0.07
+                                          : screenWidth * 0.04,
                                       color: Colors.white,
                                     ),
                                 children: [
@@ -52,14 +51,16 @@ class HeroCardOne extends StatelessWidget {
                                       ?.copyWith(
                                         //fontSize: screenWidth * 0.045,
                                         fontSize: screenWidth > 600
-                                            ? screenWidth * 0.05
+                                            ? screenWidth * 0.04
                                             : screenWidth * 0.09,
                                         color: cyclamen,
                                       )),
                               TextSpan(text: ",\nWHO BUILT US"),
                             ])),
                       ),
-                      SizedBox(height: 12,),
+                      SizedBox(
+                        height: 12,
+                      ),
                       Text(
                         "#STOPSILENTSUFFERINGS",
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -81,16 +82,13 @@ class HeroCardOne extends StatelessWidget {
               )),
           Positioned(
               bottom: 0,
-              right: 50,
+              right: isMobile ? 0 : screenWidth * 0.07,
               child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10)
-                ),
+                borderRadius:
+                    BorderRadius.only(bottomLeft: Radius.circular(10)),
                 child: Image.asset(
                   "assets/hero_picture.png",
-                  height: screenWidth > 600
-                        ? screenWidth * 0.4
-                        : screenWidth * 0.7,
+                  height: isMobile ? screenHeight * 0.3 : screenHeight * 0.68,
                 ),
               ))
         ],

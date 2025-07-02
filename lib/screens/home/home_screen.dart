@@ -64,17 +64,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 600;
     return Center(
       child: SingleChildScrollView(
         child: Column(
           spacing: 50,
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(40),
               child: SizedBox(
-                height: screenHeight - 120,
-                width: screenWidth < 400 ? screenWidth : screenWidth - 16,
+                height: isMobile ? screenHeight * 0.57 : screenHeight * 0.7,
+                width: isMobile ? screenWidth : screenWidth - 16,
                 child: Stack(
                   children: [
                     PageView.builder(

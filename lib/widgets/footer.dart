@@ -8,6 +8,7 @@ class FooterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     bool isMobile = screenWidth < 600;
     bool isTablet = screenWidth >= 600 && screenWidth < 1200;
 
@@ -23,7 +24,8 @@ class FooterSection extends StatelessWidget {
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLeftPart(context, screenWidth, isMobile, isTablet),
+                _buildLeftPart(
+                    context, screenWidth, screenHeight, isMobile, isTablet),
                 SizedBox(height: 20),
                 _buildRightPart(context, screenWidth, isMobile, isTablet),
               ],
@@ -33,8 +35,8 @@ class FooterSection extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 2,
-                  child:
-                      _buildLeftPart(context, screenWidth, isMobile, isTablet),
+                  child: _buildLeftPart(
+                      context, screenWidth, screenHeight, isMobile, isTablet),
                 ),
                 SizedBox(width: isTablet ? 40 : 60),
                 Expanded(
@@ -47,49 +49,17 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftPart(
-      BuildContext context, double screenWidth, bool isMobile, bool isTablet) {
+  Widget _buildLeftPart(BuildContext context, double screenWidth,
+      double screenHeight, bool isMobile, bool isTablet) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Logo
-        Row(
-          children: [
-            Text(
-              'PELVI',
-              style: TextStyle(
-                color: buttonColor,
-                fontWeight: FontWeight.bold,
-                fontSize: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20,
-              ),
-            ),
-            Text(
-              'Ease',
-              style: TextStyle(
-                color: const Color(0xFFFF0049).withOpacity(0.9),
-                fontWeight: FontWeight.bold,
-                fontSize: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20,
-              ),
-            ),
-            Text(
-              '™',
-              style: TextStyle(
-                color: const Color(0xFF8B4A8B),
-                fontSize: isMobile ? 10 : 12,
-              ),
-            ),
-          ],
+        Image.asset(
+          'assets/logo_with_tm.png',
+          height: isMobile ? screenHeight * 0.02 : screenHeight * 0.03,
         ),
-        SizedBox(height: isMobile ? 4 : 5),
-        // Address
+        SizedBox(height: isMobile ? 8 : 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -147,6 +117,21 @@ class FooterSection extends StatelessWidget {
             ),
           ),
         ),
+        Center(
+          child: Text(
+            'A brand by Techaro',
+            style: TextStyle(
+              color: textColor,
+              fontSize: isMobile
+                  ? 11
+                  : isTablet
+                      ? 12
+                      : 14,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        )
       ],
     );
   }
@@ -233,33 +218,23 @@ class FooterSection extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        '© ',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
-                        ),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 11 : 14,
+                        fontFamily: 'sans-serif',
                       ),
-                      Text(
-                        '${DateTime.now().year}',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
+                      children: [
+                        const TextSpan(text: '© '),
+                        TextSpan(text: '${DateTime.now().year}'),
+                        const TextSpan(
+                          text:
+                              ' Pelviease. All rights reserved. Designed and Developed \n by @Octovu',
                         ),
-                      ),
-                      Text(
-                        ' Pelviease. All rights reserved.Powered by @Octovu',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   SizedBox(height: 10),
                   _buildSocialIcons(screenWidth, isMobile),
@@ -268,33 +243,23 @@ class FooterSection extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        '© ',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
-                        ),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 11 : 14,
+                        fontFamily: 'sans-serif',
                       ),
-                      Text(
-                        '${DateTime.now().year}',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
+                      children: [
+                        const TextSpan(text: '© '),
+                        TextSpan(text: '${DateTime.now().year}'),
+                        const TextSpan(
+                          text:
+                              ' Pelviease. All rights reserved. Designed and Developed by @Octovu',
                         ),
-                      ),
-                      Text(
-                        ' Pelviease. All rights reserved.Powered by @Octovu',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 10 : 14,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   _buildSocialIcons(screenWidth, isMobile),
                 ],
@@ -418,7 +383,7 @@ class FooterSection extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _socialIcon('assets/icons/twitter.png', '', isMobile),
+        _socialIcon('assets/icons/youtube.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
         _socialIcon('assets/icons/linkedin.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
@@ -431,8 +396,8 @@ class FooterSection extends StatelessWidget {
     return InkWell(
       onTap: () => _launchUrl(url),
       child: Container(
-        width: isMobile ? 30 : 36,
-        height: isMobile ? 30 : 36,
+        width: isMobile ? 30 : 40,
+        height: isMobile ? 30 : 45,
         padding: EdgeInsets.all(isMobile ? 4 : 6),
         child: Image.asset(
           iconPath,
