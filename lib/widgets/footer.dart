@@ -191,7 +191,7 @@ class FooterSection extends StatelessWidget {
                   ),
                 ],
               ),
-        SizedBox(height: isMobile ? 20 : 40),
+        SizedBox(height: isMobile ? 0 : 40),
         // R&D Center Section
         Container(
           width: double.infinity,
@@ -227,7 +227,7 @@ class FooterSection extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: isMobile ? 15 : 20),
+        SizedBox(height: isMobile ? 0 : 20),
         // Bottom Footer Section
         isMobile
             ? Column(
@@ -240,7 +240,7 @@ class FooterSection extends StatelessWidget {
                         style: TextStyle(
                           color: textColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 12 : 14,
+                          fontSize: isMobile ? 10 : 14,
                         ),
                       ),
                       Text(
@@ -248,15 +248,15 @@ class FooterSection extends StatelessWidget {
                         style: TextStyle(
                           color: textColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 12 : 14,
+                          fontSize: isMobile ? 10 : 14,
                         ),
                       ),
                       Text(
-                        ' Pelviease. All rights reserved.    Powered by @Octovu',
+                        ' Pelviease. All rights reserved.Powered by @Octovu',
                         style: TextStyle(
                           color: textColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 12 : 14,
+                          fontSize: isMobile ? 10 : 14,
                         ),
                       ),
                     ],
@@ -268,13 +268,33 @@ class FooterSection extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '© 2025 Pelviease. All rights reserved.    Powered by @Octovu',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 12 : 14,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '© ',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 10 : 14,
+                        ),
+                      ),
+                      Text(
+                        '${DateTime.now().year}',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 10 : 14,
+                        ),
+                      ),
+                      Text(
+                        ' Pelviease. All rights reserved.Powered by @Octovu',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isMobile ? 10 : 14,
+                        ),
+                      ),
+                    ],
                   ),
                   _buildSocialIcons(screenWidth, isMobile),
                 ],

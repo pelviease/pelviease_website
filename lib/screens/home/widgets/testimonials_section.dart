@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pelviease_website/backend/providers/our_content_provider.dart';
+import 'package:pelviease_website/backend/models/our_content.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
 
 class TestimonialsSection extends StatefulWidget {
   const TestimonialsSection({super.key});
@@ -9,33 +12,24 @@ class TestimonialsSection extends StatefulWidget {
 }
 
 class _TestimonialsSectionState extends State<TestimonialsSection> {
-  final List<Map<String, String>> testimonials = [
-    {
-      'quote':
-          "I've been using all three products for over a month now, and I can genuinely feel the difference in my energy levels and overall well-being. It's refreshing to find something that actually works and is made with women's health in mind. Highly recommend!",
-      'author': 'Ananya R., 28',
-    },
-    {
-      'quote':
-          "This product is a game-changer! I feel more energetic and balanced.",
-      'author': 'Sneha P., 31',
-    },
-    {
-      'quote': "Finally found something that supports my lifestyle naturally.",
-      'author': 'Riya M., 26',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ContentProvider>(context, listen: false).testimonials;
+    });
+  }
 
   int currentIndex = 0;
 
-  void _goToPrevious() {
+  void _goToPrevious(List<Testimony> testimonials) {
     setState(() {
       currentIndex =
           (currentIndex - 1 + testimonials.length) % testimonials.length;
     });
   }
 
-  void _goToNext() {
+  void _goToNext(List<Testimony> testimonials) {
     setState(() {
       currentIndex = (currentIndex + 1) % testimonials.length;
     });
@@ -77,21 +71,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
               ),
             ),
 
-          // if(!isMobile)
-          //   Positioned(
-          //     top: 50,
-          //     left: MediaQuery.of(context).size.width * -(0.2),
-          //     child: Container(
-          //       height: 400,
-          //       width: 400,
-          //       padding: const EdgeInsets.all(24),
-          //       decoration: BoxDecoration(
-          //         color: const Color.fromARGB(255, 90, 47, 90).withAlpha(150),
-          //         borderRadius: BorderRadius.circular(30),
-          //       ),
-          //     ),
-          //   ),
-
           // Left Card
           Positioned(
             top: 50,
@@ -107,44 +86,89 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
                     width: 400,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 90, 47, 90)
-                          .withAlpha(150),
+                      color:
+                          const Color.fromARGB(255, 90, 47, 90).withAlpha(150),
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                Container(
-                  height: 400,
-                  width: isMobile ? 300 : 400,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: darkViolet,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.format_quote,
-                          color: Colors.white, size: isMobile ? 32 : 48),
-                      const SizedBox(height: 16),
-                      Text(
-                        testimonials[currentIndex]['quote']!,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      const SizedBox(height: 24),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          "- ${testimonials[currentIndex]['author']}",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontStyle: FontStyle.italic,
-                          ),
+                StreamBuilder<List<Testimony>>(
+                  stream: Provider.of<ContentProvider>(context).testimonials,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                        height: 400,
+                        width: isMobile ? 300 : 400,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: darkViolet,
+                          borderRadius: BorderRadius.circular(30),
                         ),
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Container(
+                        height: 400,
+                        width: isMobile ? 300 : 400,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: darkViolet,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Center(
+                            child: Text('Error loading testimonials')),
+                      );
+                    }
+                    final testimonials = snapshot.data ?? [];
+                    if (testimonials.isEmpty) {
+                      return Container(
+                        height: 400,
+                        width: isMobile ? 300 : 400,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: darkViolet,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Center(
+                            child: Text('No testimonials available')),
+                      );
+                    }
+                    final testimony = testimonials[currentIndex];
+                    return Container(
+                      height: 400,
+                      width: isMobile ? 300 : 400,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: darkViolet,
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                    ],
-                  ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.format_quote,
+                              color: Colors.white, size: isMobile ? 32 : 48),
+                          const SizedBox(height: 16),
+                          Text(
+                            testimony.testimony,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 16),
+                          ),
+                          const SizedBox(height: 24),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              "- ${testimony.name}, ${testimony.about}",
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -186,31 +210,42 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
                   ),
                 ),
 
-          Positioned(
-            bottom: 30,
-            left: MediaQuery.of(context).size.width * 0.3,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                  ),
-                  icon: const Icon(Icons.arrow_back_ios_new),
-                  onPressed: _goToPrevious,
-                  tooltip: "Previous",
+          // Navigation Buttons
+          StreamBuilder<List<Testimony>>(
+            stream: Provider.of<ContentProvider>(context).testimonials,
+            builder: (context, snapshot) {
+              final testimonials = snapshot.data ?? [];
+              return Positioned(
+                bottom: 30,
+                left: MediaQuery.of(context).size.width * 0.3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: testimonials.isNotEmpty
+                          ? () => _goToPrevious(testimonials)
+                          : null,
+                      tooltip: "Previous",
+                    ),
+                    const SizedBox(width: 20),
+                    IconButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: testimonials.isNotEmpty
+                          ? () => _goToNext(testimonials)
+                          : null,
+                      tooltip: "Next",
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 20),
-                IconButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                  ),
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: _goToNext,
-                  tooltip: "Next",
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
