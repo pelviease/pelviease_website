@@ -5,7 +5,6 @@ class BlogService {
   final CollectionReference _blogsCollection =
       FirebaseFirestore.instance.collection('blogs');
 
-  // Get all blogs as a stream
   Stream<List<Blog>> getBlogs() {
     return _blogsCollection
         .orderBy('timestamp', descending: true)
@@ -17,5 +16,19 @@ class BlogService {
         return Blog.fromMap(data);
       }).toList();
     });
+  }
+
+  Future<List<Blog>> fetchBlogsList() async {
+    try {
+      final querySnapshot =
+          await _blogsCollection.orderBy('timestamp', descending: true).get();
+      return querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Blog.fromMap(data);
+      }).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

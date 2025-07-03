@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pelviease_website/backend/models/blog.dart';
 import 'package:pelviease_website/backend/providers/blogs_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
-import 'package:pelviease_website/screens/blogs/widgets/custom_tab_bar,dart';
+import 'package:pelviease_website/screens/blogs/widgets/custom_tab_bar.dart';
 import 'package:pelviease_website/widgets/footer.dart';
 import 'package:provider/provider.dart';
 import 'widgets/blog_card.dart';

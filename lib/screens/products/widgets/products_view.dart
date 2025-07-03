@@ -142,11 +142,13 @@ class ProductsView extends StatelessWidget {
         SelectableText(
           product.description,
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
+          scrollPhysics: NeverScrollableScrollPhysics(),
           maxLines: isMobile ? 3 : 4,
           style: TextStyle(
             fontSize: isMobile ? 14 : 16,
             color: Colors.grey.shade800,
             height: 1.6,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
 

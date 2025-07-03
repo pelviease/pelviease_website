@@ -10,7 +10,7 @@ class CustomTabBar extends StatelessWidget {
   final Color indicatorColor;
 
   const CustomTabBar({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onTabSelected,
     required this.tabLabels,
@@ -18,7 +18,7 @@ class CustomTabBar extends StatelessWidget {
     required this.unselectedColor,
     required this.backgroundColor,
     required this.indicatorColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class CustomTabBar extends StatelessWidget {
           int index = entry.key;
           String label = entry.value;
           bool isSelected = index == selectedIndex;
-          
+
           return Expanded(
             child: GestureDetector(
               onTap: () => onTabSelected(index),
@@ -50,7 +50,8 @@ class CustomTabBar extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isSelected ? selectedColor : unselectedColor,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),

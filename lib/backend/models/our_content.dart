@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Doctor {
@@ -41,6 +40,68 @@ class Doctor {
       'location': location,
       'phone': phone,
       'profile': profile,
+    };
+  }
+}
+
+class WatchContent {
+  final String id;
+  final String videoUrl;
+  final String thumbnailUrl;
+  final String caption;
+
+  WatchContent({
+    required this.id,
+    required this.videoUrl,
+    required this.thumbnailUrl,
+    required this.caption,
+  });
+
+  factory WatchContent.fromMap(Map<String, dynamic> data, String id) {
+    return WatchContent(
+      id: id,
+      videoUrl: data['videoUrl'] ?? '',
+      thumbnailUrl: data['thumbnailUrl'] ?? '',
+      caption: data['caption'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'videoUrl': videoUrl,
+      'thumbnailUrl': thumbnailUrl,
+      'caption': caption,
+    };
+  }
+}
+
+class Testimony {
+  final String id;
+  final String name;
+  final String testimony;
+  final String about;
+
+  Testimony({
+    required this.id,
+    required this.name,
+    required this.testimony,
+    required this.about,
+  });
+
+  factory Testimony.fromMap(Map<String, dynamic> data, String id) {
+    return Testimony(
+      id: id,
+      name: data['name'] ?? '',
+      testimony: data['testimony'] ?? '',
+      about: data['about'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'testimony': testimony,
+      'about': about,
     };
   }
 }

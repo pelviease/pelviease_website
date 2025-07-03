@@ -1,13 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/providers/product_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class FooterSection extends StatelessWidget {
+class FooterSection extends StatefulWidget {
   const FooterSection({super.key});
+
+  @override
+  State<FooterSection> createState() => _FooterSectionState();
+}
+
+class _FooterSectionState extends State<FooterSection> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProductsId();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProductsId();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     bool isMobile = screenWidth < 600;
     bool isTablet = screenWidth >= 600 && screenWidth < 1200;
 
@@ -23,7 +48,8 @@ class FooterSection extends StatelessWidget {
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLeftPart(context, screenWidth, isMobile, isTablet),
+                _buildLeftPart(
+                    context, screenWidth, screenHeight, isMobile, isTablet),
                 SizedBox(height: 20),
                 _buildRightPart(context, screenWidth, isMobile, isTablet),
               ],
@@ -33,8 +59,8 @@ class FooterSection extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 2,
-                  child:
-                      _buildLeftPart(context, screenWidth, isMobile, isTablet),
+                  child: _buildLeftPart(
+                      context, screenWidth, screenHeight, isMobile, isTablet),
                 ),
                 SizedBox(width: isTablet ? 40 : 60),
                 Expanded(
@@ -47,49 +73,30 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftPart(
-      BuildContext context, double screenWidth, bool isMobile, bool isTablet) {
+  Widget _buildLeftPart(BuildContext context, double screenWidth,
+      double screenHeight, bool isMobile, bool isTablet) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Logo
-        Row(
-          children: [
-            Text(
-              'PELVI',
-              style: TextStyle(
-                color: buttonColor,
-                fontWeight: FontWeight.bold,
-                fontSize: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20,
-              ),
-            ),
-            Text(
-              'Ease',
-              style: TextStyle(
-                color: const Color(0xFFFF0049).withOpacity(0.9),
-                fontWeight: FontWeight.bold,
-                fontSize: isMobile
-                    ? 16
-                    : isTablet
-                        ? 18
-                        : 20,
-              ),
-            ),
-            Text(
-              '™',
-              style: TextStyle(
-                color: const Color(0xFF8B4A8B),
-                fontSize: isMobile ? 10 : 12,
-              ),
-            ),
-          ],
+        Image.asset(
+          'assets/logo_with_tm.png',
+          height: isMobile ? screenHeight * 0.02 : screenHeight * 0.03,
         ),
-        SizedBox(height: isMobile ? 4 : 5),
-        // Address
+        Text(
+          'A brand by Techaro',
+          style: TextStyle(
+            color: textColor,
+            fontSize: isMobile
+                ? 8
+                : isTablet
+                    ? 9
+                    : 10,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: isMobile ? 8 : 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -159,13 +166,16 @@ class FooterSection extends StatelessWidget {
         isMobile
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildCompanySection(screenWidth, isMobile, isTablet),
+                      _buildCompanySection(
+                          context, screenWidth, isMobile, isTablet),
                       // SizedBox(: 20),
-                      _buildProductsSection(screenWidth, isMobile, isTablet),
+                      _buildProductsSection(
+                          context, screenWidth, isMobile, isTablet),
                     ],
                   ),
                   SizedBox(height: 20),
@@ -176,13 +186,13 @@ class FooterSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child:
-                        _buildCompanySection(screenWidth, isMobile, isTablet),
+                    child: _buildCompanySection(
+                        context, screenWidth, isMobile, isTablet),
                   ),
                   SizedBox(width: isTablet ? 30 : 40),
                   Expanded(
-                    child:
-                        _buildProductsSection(screenWidth, isMobile, isTablet),
+                    child: _buildProductsSection(
+                        context, screenWidth, isMobile, isTablet),
                   ),
                   SizedBox(width: isTablet ? 30 : 40),
                   Expanded(
@@ -191,7 +201,7 @@ class FooterSection extends StatelessWidget {
                   ),
                 ],
               ),
-        SizedBox(height: isMobile ? 20 : 40),
+        SizedBox(height: isMobile ? 0 : 40),
         // R&D Center Section
         Container(
           width: double.infinity,
@@ -227,18 +237,28 @@ class FooterSection extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: isMobile ? 15 : 20),
+        SizedBox(height: isMobile ? 0 : 20),
         // Bottom Footer Section
         isMobile
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '© 2025 Pelviease. All rights reserved.    Powered by @Octovu',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 12 : 14,
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 11 : 14,
+                        fontFamily: 'sans-serif',
+                      ),
+                      children: [
+                        const TextSpan(text: '© '),
+                        TextSpan(text: '${DateTime.now().year}'),
+                        const TextSpan(
+                          text:
+                              ' Pelviease. All rights reserved. Designed and Developed \n by @Octovu',
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 10),
@@ -248,12 +268,22 @@ class FooterSection extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '© 2025 Pelviease. All rights reserved.    Powered by @Octovu',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 12 : 14,
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 11 : 14,
+                        fontFamily: 'sans-serif',
+                      ),
+                      children: [
+                        const TextSpan(text: '© '),
+                        TextSpan(text: '${DateTime.now().year}'),
+                        const TextSpan(
+                          text:
+                              ' Pelviease. All rights reserved. Designed and Developed by @Octovu',
+                        ),
+                      ],
                     ),
                   ),
                   _buildSocialIcons(screenWidth, isMobile),
@@ -264,9 +294,10 @@ class FooterSection extends StatelessWidget {
   }
 
   Widget _buildCompanySection(
-      double screenWidth, bool isMobile, bool isTablet) {
+      BuildContext context, double screenWidth, bool isMobile, bool isTablet) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           'Our Company',
@@ -276,37 +307,58 @@ class FooterSection extends StatelessWidget {
             color: textColor,
           ),
         ),
-        SizedBox(height: isMobile ? 15 : 20),
-        _buildFooterLink('About US', isMobile),
-        SizedBox(height: isMobile ? 10 : 12),
-        _buildFooterLink('Products', isMobile),
-        SizedBox(height: isMobile ? 10 : 12),
-        _buildFooterLink('Blogs', isMobile),
+        _buildFooterLink(context, 'About US', isMobile, '/about'),
+        _buildFooterLink(context, 'Products', isMobile, '/products'),
+        _buildFooterLink(context, 'Blogs', isMobile, '/blogs'),
+        _buildFooterLink(context, 'Doctors', isMobile, '/doctors'),
+        _buildFooterLink(context, 'Contact', isMobile, '/contact'),
       ],
     );
   }
 
   Widget _buildProductsSection(
-      double screenWidth, bool isMobile, bool isTablet) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Products',
-          style: TextStyle(
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: FontWeight.bold,
-            color: textColor,
+      BuildContext context, double screenWidth, bool isMobile, bool isTablet) {
+    final productsId = Provider.of<ProductProvider>(context).productsId;
+    // print("Products ID in footer: $productsId");
+    return Consumer<ProductProvider>(
+        builder: (context, productProvider, child) {
+      if (productProvider.isLoading) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (productsId.isEmpty) {
+        return Center(
+          child: Text(
+            'No Products Available',
+            style: TextStyle(color: textColor),
           ),
-        ),
-        SizedBox(height: isMobile ? 15 : 20),
-        _buildFooterLink('Dilator 1', isMobile),
-        SizedBox(height: isMobile ? 10 : 12),
-        _buildFooterLink('Dilator 2', isMobile),
-        SizedBox(height: isMobile ? 10 : 12),
-        _buildFooterLink('Dilator 3', isMobile),
-      ],
-    );
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Products',
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          SizedBox(height: isMobile ? 15 : 20),
+          ...productsId.take(5).map((product) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFooterLink(context, product['name'].toString(),
+                      isMobile, '/products/${product['id']}'),
+                  // SizedBox(height: isMobile ? 10 : 12),
+                ],
+              )),
+        ],
+      );
+    });
   }
 
   Widget _buildContactSection(
@@ -364,12 +416,16 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterLink(String text, bool isMobile) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: textColor,
-        fontSize: isMobile ? 11 : 13,
+  Widget _buildFooterLink(
+      BuildContext context, String text, bool isMobile, String path) {
+    return TextButton(
+      onPressed: () => context.go(path),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: isMobile ? 11 : 13,
+        ),
       ),
     );
   }
@@ -378,7 +434,7 @@ class FooterSection extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _socialIcon('assets/icons/twitter.png', '', isMobile),
+        _socialIcon('assets/icons/youtube.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
         _socialIcon('assets/icons/linkedin.png', '', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
@@ -391,8 +447,8 @@ class FooterSection extends StatelessWidget {
     return InkWell(
       onTap: () => _launchUrl(url),
       child: Container(
-        width: isMobile ? 30 : 36,
-        height: isMobile ? 30 : 36,
+        width: isMobile ? 30 : 40,
+        height: isMobile ? 30 : 45,
         padding: EdgeInsets.all(isMobile ? 4 : 6),
         child: Image.asset(
           iconPath,

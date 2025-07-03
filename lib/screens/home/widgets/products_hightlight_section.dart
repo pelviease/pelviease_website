@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/providers/product_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ProductHighlightSection extends StatefulWidget {
@@ -16,27 +19,6 @@ class _ProductHighlightSectionState extends State<ProductHighlightSection> {
   final PageController _controller = PageController();
   late Timer _autoPlayTimer;
 
-  final List<Map<String, String>> _products = [
-    {
-      'title': 'PERINEOMETER',
-      'description':
-          'Perineometer is an advanced diagnostic and rehabilitation device designed to assess and strengthen pelvic floor muscles.',
-      'image': 'perineometer.png',
-    },
-    {
-      'title': 'Dialator',
-      'description':
-          'Tracks muscle responses and helps in pelvic floor training using visual and auditory cues.',
-      'image': 'dialator.png',
-    },
-    {
-      'title': 'Vaginal Weights',
-      'description':
-          'Electrical stimulation device to assist in pelvic floor rehabilitation and therapy.',
-      'image': 'product3.png',
-    },
-  ];
-
   int _currentPage = 0;
 
   @override
@@ -45,12 +27,16 @@ class _ProductHighlightSectionState extends State<ProductHighlightSection> {
 
     _autoPlayTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_controller.hasClients) {
-        _currentPage = (_currentPage + 1) % _products.length;
-        _controller.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
+        final productProvider =
+            Provider.of<ProductProvider>(context, listen: false);
+        if (productProvider.products.isNotEmpty) {
+          _currentPage = (_currentPage + 1) % productProvider.products.length;
+          _controller.animateToPage(
+            _currentPage,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
       }
     });
   }
@@ -70,52 +56,63 @@ class _ProductHighlightSectionState extends State<ProductHighlightSection> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(40),
       ),
-      child: isMobile
-          ? Column(
-              children: [
-                _LeftCard(isMobile),
-                const SizedBox(height: 24),
-                SizedBox(
-                    height: 300,
-                    child: _RightCarousel(_controller, _products, isMobile)),
-                const SizedBox(height: 16),
-                _buildDots(),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: _LeftCard(isMobile)),
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    height: 400,
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                        color: lightViolet,
-                        borderRadius: BorderRadius.circular(30)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          height: 350,
-                          child:
-                              _RightCarousel(_controller, _products, isMobile),
-                        ),
-                        _buildDots(),
-                      ],
+      child:
+          Consumer<ProductProvider>(builder: (context, productProvider, child) {
+        if (productProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (productProvider.error != null) {
+          return Center(child: Text('Error: ${productProvider.error}'));
+        }
+        if (productProvider.products.isEmpty) {
+          return const Center(child: Text('No products available'));
+        }
+        return isMobile
+            ? Column(
+                children: [
+                  _LeftCard(isMobile),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                      height: 300,
+                      child: _RightCarousel(_controller, isMobile)),
+                  const SizedBox(height: 16),
+                  _buildDots(productProvider.products.length),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: _LeftCard(isMobile)),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 400,
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                          color: lightViolet,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: 350,
+                            child: _RightCarousel(_controller, isMobile),
+                          ),
+                          _buildDots(productProvider.products.length),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+      }),
     );
   }
 
-  Widget _buildDots() {
+  Widget _buildDots(int length) {
     return SmoothPageIndicator(
       controller: _controller,
-      count: _products.length,
+      count: length,
       effect: ExpandingDotsEffect(
         activeDotColor: darkViolet,
         dotColor: darkViolet.withAlpha(100),
@@ -202,12 +199,18 @@ class _LeftCard extends StatelessWidget {
             bottom: 24,
             right: 24,
             child: Container(
-              padding: EdgeInsets.all(6),
+              height: 40,
+              width: 45,
               decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(width: 2, color: darkViolet),
                   shape: BoxShape.circle),
-              child: Icon(Icons.arrow_outward, color: darkViolet),
+              child: IconButton(
+                  onPressed: () => context.go('/products'),
+                  icon: Icon(
+                    Icons.arrow_outward,
+                    color: darkViolet,
+                  )),
             ),
           ),
         ],
@@ -218,13 +221,15 @@ class _LeftCard extends StatelessWidget {
 
 class _RightCarousel extends StatelessWidget {
   final PageController controller;
-  final List<Map<String, String>> products;
   final bool isMobile;
 
-  const _RightCarousel(this.controller, this.products, this.isMobile);
+  const _RightCarousel(this.controller, this.isMobile);
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final products =
+        Provider.of<ProductProvider>(context, listen: false).products;
     return PageView.builder(
       controller: controller,
       itemCount: products.length,
@@ -243,7 +248,7 @@ class _RightCarousel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product['title'] ?? '',
+                        product.name,
                         style: TextStyle(
                           fontSize: isMobile ? 32 : 48,
                           fontWeight: FontWeight.bold,
@@ -252,12 +257,16 @@ class _RightCarousel extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
-                        width: isMobile ? MediaQuery.of(context).size.width / 2.6 : MediaQuery.of(context).size.width / 2.6,
+                        width: isMobile
+                            ? MediaQuery.of(context).size.width / 2.6
+                            : MediaQuery.of(context).size.width / 2.6,
                         child: Text(
-                          product['description'] ?? '',
+                          product.description,
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
                           style: Theme.of(context)
                               .textTheme
-                              .bodyMedium
+                              .bodySmall
                               ?.copyWith(
                                   fontSize: isMobile ? 14 : 20,
                                   color: Colors.black87),
@@ -268,43 +277,48 @@ class _RightCarousel extends StatelessWidget {
                         children: [
                           Icon(Icons.verified, size: 20, color: Colors.black87),
                           SizedBox(width: 8),
-                          Text("CDSCO Certified",
-                              style: Theme.of(context).textTheme.bodyMedium),
+                          product.isCDSCOCertified
+                              ? Text("CDSCO Certified",
+                                  style: Theme.of(context).textTheme.bodyMedium)
+                              : Text('')
                         ],
                       ),
                     ],
                   ),
-                  IntrinsicWidth(
-                    child: Container(
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                          color: darkViolet,
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text("    Buy Now",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  )),
-                          SizedBox(
-                            width: 16,
-                          ),
-                          Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                                color: Colors.white, shape: BoxShape.circle),
-                            child: Icon(
-                              Icons.arrow_outward_sharp,
-                              color: darkViolet,
+                  GestureDetector(
+                    onTap: () => context.go('/products/${product.id}'),
+                    child: IntrinsicWidth(
+                      child: Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                            color: darkViolet,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text("    Buy Now",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    )),
+                            SizedBox(
+                              width: 16,
                             ),
-                          )
-                        ],
+                            Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                  color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(
+                                Icons.arrow_outward_sharp,
+                                color: darkViolet,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -313,12 +327,16 @@ class _RightCarousel extends StatelessWidget {
               Align(
                 alignment:
                     isMobile ? Alignment.bottomRight : Alignment.centerRight,
-                child: Image.asset(
-                  product['image'] ?? '',
-
-
-                  width: isMobile ? (product['image'] == 'product3.png' ? 80 : 80) : 228,
-
+                child: Image.network(
+                  product.images.first,
+                  width: isMobile ? screenWidth * 0.345 : screenWidth * 0.17,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: isMobile ? 80 : screenWidth * 0.17,
+                    height: isMobile ? 80 : screenWidth * 0.17,
+                    color: Colors.grey[200],
+                    child: Icon(Icons.broken_image,
+                        color: Colors.grey, size: isMobile ? 40 : 60),
+                  ),
                 ),
               ),
             ],
