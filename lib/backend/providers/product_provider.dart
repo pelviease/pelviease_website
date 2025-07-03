@@ -6,12 +6,14 @@ import 'package:pelviease_website/const/enums/payment_enum.dart';
 class ProductProvider with ChangeNotifier {
   final ProductService _productService = ProductService();
   List<Product> _products = [];
+  List<Map<String, String>> productsId = [];
   bool _isLoading = false;
   String? _error;
 
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  List<Map<String, String>> get productsIdList => productsId;
 
   ProductProvider() {
     _initProductsStream();
@@ -80,6 +82,24 @@ class ProductProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<List<Map<String, String>>> fetchProductsId() async {
+    try {
+      final productsList = await _productService.getProducts().first;
+      // print(
+      //     "Products ID in provider: ${productsList.map((product) => product.id).toList()}");
+      productsId = productsList
+          .map((product) => {
+                'id': product.id,
+                'name': product.name,
+              })
+          .toList();
+      return productsId;
+    } catch (error) {
+      // print("Error fetching products ID: $error");
+      return [];
     }
   }
 }
