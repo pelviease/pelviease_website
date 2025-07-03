@@ -52,22 +52,29 @@ class _FooterSectionState extends State<FooterSection> {
                     context, screenWidth, screenHeight, isMobile, isTablet),
                 SizedBox(height: 20),
                 _buildRightPart(context, screenWidth, isMobile, isTablet),
+                _buildPoliciesSection()
               ],
             )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          : Column(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildLeftPart(
-                      context, screenWidth, screenHeight, isMobile, isTablet),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: _buildLeftPart(context, screenWidth, screenHeight,
+                          isMobile, isTablet),
+                    ),
+                    SizedBox(width: isTablet ? 40 : 60),
+                    Expanded(
+                      flex: 3,
+                      child: _buildRightPart(
+                          context, screenWidth, isMobile, isTablet),
+                    ),
+                  ],
                 ),
-                SizedBox(width: isTablet ? 40 : 60),
-                Expanded(
-                  flex: 3,
-                  child:
-                      _buildRightPart(context, screenWidth, isMobile, isTablet),
-                ),
+                SizedBox(height: 40),
+                _buildPoliciesSection(),
               ],
             ),
     );
@@ -466,6 +473,61 @@ class _FooterSectionState extends State<FooterSection> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildPoliciesSection() {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: darkViolet,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          InkWell(
+            onTap: () => context.go('/privacy-policy'),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text(
+                'Privacy Policy',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () => context.go('/terms-and-conditions'),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text(
+                'Terms and Conditions',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+              ),
+            )),
+          ),
+          InkWell(
+            onTap: () => context.go('/delivery-policy'),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text(
+                'Delivery Policy',
+                style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+            )),
+          ),
+        ],
       ),
     );
   }
