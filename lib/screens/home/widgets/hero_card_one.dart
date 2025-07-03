@@ -10,6 +10,9 @@ class HeroCardOne extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 600;
     return Container(
+      margin: isMobile
+          ? EdgeInsets.symmetric(horizontal: 4)
+          : EdgeInsets.symmetric(horizontal: 8),
       height: isMobile ? screenHeight - 120 : screenHeight * 0.5,
       width: screenWidth < 400 ? screenWidth : screenWidth - 16,
       decoration: BoxDecoration(

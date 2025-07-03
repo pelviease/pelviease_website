@@ -41,11 +41,11 @@ class PartnersSection extends StatelessWidget {
                   childAspectRatio: 1.5,
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    partnerCard("partner1.png", isMobile),
-                    partnerCard("partner2.png", isMobile),
-                    partnerCard("partner3.png", isMobile),
-                    partnerCard("partner4.png", isMobile),
-                    partnerCard("partner5.png", isMobile),
+                    partnerCard("assets/partner1.png", isMobile),
+                    partnerCard("assets/partner2.png", isMobile),
+                    partnerCard("assets/partner3.png", isMobile),
+                    partnerCard("assets/partner4.png", isMobile),
+                    partnerCard("assets/partner5.png", isMobile),
                   ],
                 )
               : Column(
@@ -54,9 +54,9 @@ class PartnersSection extends StatelessWidget {
                       spacing: 50,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        partnerCard("partner1.png", isMobile),
-                        partnerCard("partner2.png", isMobile),
-                        partnerCard("partner3.png", isMobile),
+                        partnerCard("assets/partner1.png", isMobile),
+                        partnerCard("assets/partner2.png", isMobile),
+                        partnerCard("assets/partner3.png", isMobile),
                       ],
                     ),
                     SizedBox(
@@ -66,8 +66,8 @@ class PartnersSection extends StatelessWidget {
                       spacing: 50,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        partnerCard("partner4.png", isMobile),
-                        partnerCard("partner5.png", isMobile),
+                        partnerCard("assets/partner4.png", isMobile),
+                        partnerCard("assets/partner5.png", isMobile),
                       ],
                     ),
                   ],

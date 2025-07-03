@@ -177,7 +177,7 @@ class _LeftCard extends StatelessWidget {
               bottom: isMobile ? -35 : -50,
               left: 30,
               child: Image.asset(
-                'perineometer.png',
+                'assets/perineometer.png',
                 height: isMobile ? 200 : 280,
               ),
             ),
@@ -185,7 +185,7 @@ class _LeftCard extends StatelessWidget {
               bottom: isMobile ? -20 : -30,
               left: 100,
               child: Image.asset(
-                'dialator.png',
+                'assets/dialator.png',
                 height: isMobile ? 120 : 160,
               ),
             ),
@@ -193,7 +193,7 @@ class _LeftCard extends StatelessWidget {
               bottom: -10,
               left: 220,
               child: Image.asset(
-                'product3.png',
+                'assets/product3.png',
                 height: isMobile ? 100 : 140,
               ),
             ),
