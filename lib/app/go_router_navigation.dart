@@ -15,6 +15,9 @@ import 'package:pelviease_website/widgets/app_scaffold.dart';
 import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 
+import '../screens/policies/delivery_policy_screen.dart';
+import '../screens/policies/privacy_policy_screen.dart';
+import '../screens/policies/terms_and_conditions_screen.dart';
 import '../screens/product_details/product_details.dart';
 import 'error_page.dart';
 
@@ -126,6 +129,25 @@ final GoRouter appRouter = GoRouter(
           path: '/orders',
           builder: (context, state) {
             return MyOrdersScreen();
+          },
+        ),
+        GoRoute(
+          path: '/privacy-policy',
+          builder: (context, state) {
+            return PrivacyPolicyScreen();
+          },
+        ),
+
+        GoRoute(
+          path: '/terms-and-conditions',
+          builder: (context, state) {
+            return TermsAndConditionsScreen();
+          },
+        ),
+        GoRoute(
+          path: '/delivery-policy',
+          builder: (context, state) {
+            return DeliveryPolicyScreen();
           },
         ),
       ],

@@ -644,90 +644,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: SafeArea(
                     child: SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: checkoutProvider.isLoading ||
-                                _checkoutItems
-                                    .every((item) => !item.isCheckedOut)
-                            ? null
-                            : () async {
-                                if (checkoutProvider.selectedAddress == null) {
-                                  showCustomToast(
-                                      title: "Select Address",
-                                      description:
-                                          "Please select a delivery address",
-                                      type: ToastificationType.info);
-                                  return;
-                                }
-                                String? userId = widget.userId.trim().isNotEmpty
-                                    ? widget.userId
-                                    : null;
-                                String? userName =
-                                    widget.userName.trim().isNotEmpty
-                                        ? widget.userName
-                                        : null;
-                                String? phoneNumber =
-                                    widget.phoneNumber.trim().isNotEmpty
-                                        ? widget.phoneNumber
-                                        : null;
-                                if (userId == null ||
-                                    userName == null ||
-                                    phoneNumber == null) {
-                                  final authProvider =
-                                      Provider.of<AuthProvider>(context,
-                                          listen: false);
-                                  userId ??= authProvider.user?.id ?? '';
-                                  userName ??= authProvider.user?.name ?? '';
-                                  phoneNumber ??=
-                                      authProvider.user?.phoneNumber ?? '';
-                                }
-                                final selectedItems = _checkoutItems
-                                    .where((item) => item.isCheckedOut)
-                                    .map((item) => item.cartItem)
-                                    .toList();
-                                final success =
-                                    await checkoutProvider.placeOrder(
-                                  cartItems: selectedItems,
-                                  userId: userId,
-                                  userName: userName,
-                                  phoneNumber: phoneNumber,
-                                  userFcmToken: "",
-                                  discount: cartProvider.discount,
-                                );
-                                if (success) {
-                                  // Remove only selected items from cart
-                                  for (var item in selectedItems) {
-                                    await cartProvider.removeItem(item.id);
-                                  }
-                                  showCustomToast(
-                                      title: "Order Confirmed",
-                                      description: "Order placed successfully!",
-                                      type: ToastificationType.success);
-                                  context.go("/orders");
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: isMobile
+                      ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              context.go("/delivery-policy");
+                            },
+                            child: Text("Delivery Policy", style: TextStyle(
+                              color: textPrimaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            )),
                           ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.shopping_cart_checkout),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Place Order • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                          SizedBox(height: 8),
+                          placeOrderButton(checkoutProvider, context, cartProvider),
+                        ],
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              context.go("/delivery-policy");
+                            },
+                            child: Text("Delivery Policy", style: TextStyle(
+                              color: textPrimaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            )),
+                          ),
+                          placeOrderButton(checkoutProvider, context, cartProvider),
+                        ],
                       ),
                     ),
                   ),
@@ -735,5 +684,93 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             ),
     );
+  }
+
+  ElevatedButton placeOrderButton(CheckoutProvider checkoutProvider, BuildContext context, CartProvider cartProvider) {
+    return ElevatedButton(
+                          onPressed: checkoutProvider.isLoading ||
+                                  _checkoutItems
+                                      .every((item) => !item.isCheckedOut)
+                              ? null
+                              : () async {
+                                  if (checkoutProvider.selectedAddress == null) {
+                                    showCustomToast(
+                                        title: "Select Address",
+                                        description:
+                                            "Please select a delivery address",
+                                        type: ToastificationType.info);
+                                    return;
+                                  }
+                                  String? userId = widget.userId.trim().isNotEmpty
+                                      ? widget.userId
+                                      : null;
+                                  String? userName =
+                                      widget.userName.trim().isNotEmpty
+                                          ? widget.userName
+                                          : null;
+                                  String? phoneNumber =
+                                      widget.phoneNumber.trim().isNotEmpty
+                                          ? widget.phoneNumber
+                                          : null;
+                                  if (userId == null ||
+                                      userName == null ||
+                                      phoneNumber == null) {
+                                    final authProvider =
+                                        Provider.of<AuthProvider>(context,
+                                            listen: false);
+                                    userId ??= authProvider.user?.id ?? '';
+                                    userName ??= authProvider.user?.name ?? '';
+                                    phoneNumber ??=
+                                        authProvider.user?.phoneNumber ?? '';
+                                  }
+                                  final selectedItems = _checkoutItems
+                                      .where((item) => item.isCheckedOut)
+                                      .map((item) => item.cartItem)
+                                      .toList();
+                                  final success =
+                                      await checkoutProvider.placeOrder(
+                                    cartItems: selectedItems,
+                                    userId: userId,
+                                    userName: userName,
+                                    phoneNumber: phoneNumber,
+                                    userFcmToken: "",
+                                    discount: cartProvider.discount,
+                                  );
+                                  if (success) {
+                                    // Remove only selected items from cart
+                                    for (var item in selectedItems) {
+                                      await cartProvider.removeItem(item.id);
+                                    }
+                                    showCustomToast(
+                                        title: "Order Confirmed",
+                                        description: "Order placed successfully!",
+                                        type: ToastificationType.success);
+                                    context.go("/orders");
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.shopping_cart_checkout, color: Colors.white,),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Place Order • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
   }
 }
