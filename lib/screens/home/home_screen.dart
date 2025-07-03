@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Center(
       child: SingleChildScrollView(
         child: Column(
-          spacing: 50,
+          spacing: 30,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

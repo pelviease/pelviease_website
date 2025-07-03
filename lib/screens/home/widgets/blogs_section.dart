@@ -41,7 +41,7 @@ class _BlogsSectionState extends State<BlogsSection> {
         );
       }
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
         width: double.infinity,
         child: Column(

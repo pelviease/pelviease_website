@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/providers/product_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:provider/provider.dart';
@@ -198,12 +199,18 @@ class _LeftCard extends StatelessWidget {
             bottom: 24,
             right: 24,
             child: Container(
-              padding: EdgeInsets.all(6),
+              height: 40,
+              width: 45,
               decoration: BoxDecoration(
                   color: Colors.transparent,
                   border: Border.all(width: 2, color: darkViolet),
                   shape: BoxShape.circle),
-              child: Icon(Icons.arrow_outward, color: darkViolet),
+              child: IconButton(
+                  onPressed: () => context.go('/products'),
+                  icon: Icon(
+                    Icons.arrow_outward,
+                    color: darkViolet,
+                  )),
             ),
           ),
         ],
@@ -278,37 +285,40 @@ class _RightCarousel extends StatelessWidget {
                       ),
                     ],
                   ),
-                  IntrinsicWidth(
-                    child: Container(
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                          color: darkViolet,
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text("    Buy Now",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  )),
-                          SizedBox(
-                            width: 16,
-                          ),
-                          Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                                color: Colors.white, shape: BoxShape.circle),
-                            child: Icon(
-                              Icons.arrow_outward_sharp,
-                              color: darkViolet,
+                  GestureDetector(
+                    onTap: () => context.go('/products/${product.id}'),
+                    child: IntrinsicWidth(
+                      child: Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                            color: darkViolet,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text("    Buy Now",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    )),
+                            SizedBox(
+                              width: 16,
                             ),
-                          )
-                        ],
+                            Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                  color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(
+                                Icons.arrow_outward_sharp,
+                                color: darkViolet,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -27,7 +27,7 @@ class _WatchOurContentSectionState extends State<WatchOurContentSection> {
     final bool isMobile = MediaQuery.of(context).size.width < 800;
     double height = MediaQuery.of(context).size.height;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 60),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: BoxDecoration(
         color: const Color(0xFFF9F1FA),
         borderRadius: BorderRadius.circular(30),
@@ -58,7 +58,7 @@ class _WatchOurContentSectionState extends State<WatchOurContentSection> {
               }
               return FlutterCarousel(
                 options: FlutterCarouselOptions(
-                  height: isMobile ? height * 0.21 : height * 0.37,
+                  height: isMobile ? height * 0.22 : height * 0.38,
                   viewportFraction: isMobile ? 0.7 : 0.3,
                   showIndicator: false,
                   enableInfiniteScroll: true,

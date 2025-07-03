@@ -10,18 +10,17 @@ Widget _buildHeroCard(String imagePath, Color backgroundColor, double height,
     width: width,
     height: height,
     margin: isMobile ? EdgeInsets.symmetric(horizontal: 10) : null,
-    padding: isMobile ? EdgeInsets.all(5) : null,
     decoration: BoxDecoration(
       color: backgroundColor.withOpacity(0.9),
       borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.15),
-          spreadRadius: 3,
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
+      // boxShadow: [
+      //   BoxShadow(
+      //     color: Colors.black.withOpacity(0.15),
+      //     spreadRadius: 3,
+      //     blurRadius: 10,
+      //     offset: const Offset(0, 4),
+      //   ),
+      // ],
     ),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(20),

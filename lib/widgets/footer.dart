@@ -59,6 +59,19 @@ class FooterSection extends StatelessWidget {
           'assets/logo_with_tm.png',
           height: isMobile ? screenHeight * 0.02 : screenHeight * 0.03,
         ),
+        Text(
+          'A brand by Techaro',
+          style: TextStyle(
+            color: textColor,
+            fontSize: isMobile
+                ? 8
+                : isTablet
+                    ? 9
+                    : 10,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         SizedBox(height: isMobile ? 8 : 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,21 +130,6 @@ class FooterSection extends StatelessWidget {
             ),
           ),
         ),
-        Center(
-          child: Text(
-            'A brand by Techaro',
-            style: TextStyle(
-              color: textColor,
-              fontSize: isMobile
-                  ? 11
-                  : isTablet
-                      ? 12
-                      : 14,
-              height: 1.4,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        )
       ],
     );
   }

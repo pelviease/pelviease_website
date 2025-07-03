@@ -41,7 +41,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
 
     return SizedBox(
       width: double.infinity,
-      height: 550,
+      height: 520,
       child: Stack(
         children: [
           // Pink background
@@ -216,7 +216,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             builder: (context, snapshot) {
               final testimonials = snapshot.data ?? [];
               return Positioned(
-                bottom: 30,
+                bottom: 10,
                 left: MediaQuery.of(context).size.width * 0.3,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

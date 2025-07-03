@@ -71,11 +71,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 // Determine if we're on desktop/tablet or mobile
                 bool isDesktop = constraints.maxWidth > 600;
                 double maxWidth = isDesktop ? 400 : double.infinity;
-                double horizontalPadding = isDesktop ? 0 : 18;
 
                 return Container(
                   constraints: BoxConstraints(maxWidth: maxWidth),
-                  margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: _buildAuthCard(isDesktop),
                 );
               },
@@ -88,7 +86,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget _buildAuthCard(bool isDesktop) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isDesktop ? 32 : 8),
       margin: EdgeInsets.symmetric(
         horizontal: isDesktop ? 0 : 16,
         vertical: 32,
