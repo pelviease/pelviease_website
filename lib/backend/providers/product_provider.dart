@@ -96,6 +96,7 @@ class ProductProvider with ChangeNotifier {
                 'name': product.name,
               })
           .toList();
+      notifyListeners();
       return productsId;
     } catch (error) {
       // print("Error fetching products ID: $error");

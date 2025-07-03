@@ -130,90 +130,93 @@ class _LeftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: isMobile ? 300 : 400,
-      decoration: BoxDecoration(
-        color: cyclamen.withAlpha(160),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 30,
-            top: 50,
-            child: Opacity(
-              opacity: 1,
-              child: Center(
-                child: Text(
-                  'OUR\nPRODUCTS',
-                  style: TextStyle(
-                      fontSize: isMobile ? 32 : 48,
-                      fontWeight: FontWeight.bold,
-                      color: darkViolet,
-                      letterSpacing: 2,
-                      height: 0.9),
+    return InkWell(
+      onTap: () => context.go('/products'),
+      child: Container(
+        height: isMobile ? 300 : 400,
+        decoration: BoxDecoration(
+          color: cyclamen.withAlpha(160),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              left: 30,
+              top: 50,
+              child: Opacity(
+                opacity: 1,
+                child: Center(
+                  child: Text(
+                    'OUR\nPRODUCTS',
+                    style: TextStyle(
+                        fontSize: isMobile ? 32 : 48,
+                        fontWeight: FontWeight.bold,
+                        color: darkViolet,
+                        letterSpacing: 2,
+                        height: 0.9),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            top: 140,
-            left: 30,
-            child: Text(
-              'OUR\nPRODUCTS\nOUR\nPRODUCTS\nOUR\nPRODUCTS',
-              style: TextStyle(
-                  fontSize: isMobile ? 32 : 48,
-                  fontWeight: FontWeight.bold,
-                  foreground: Paint()
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = .8
-                    ..color = darkViolet.withAlpha(100),
-                  height: 1),
+            Positioned(
+              top: 140,
+              left: 30,
+              child: Text(
+                'OUR\nPRODUCTS\nOUR\nPRODUCTS\nOUR\nPRODUCTS',
+                style: TextStyle(
+                    fontSize: isMobile ? 32 : 48,
+                    fontWeight: FontWeight.bold,
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = .8
+                      ..color = darkViolet.withAlpha(100),
+                    height: 1),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: isMobile ? -35 : -50,
-            left: 30,
-            child: Image.asset(
-              'perineometer.png',
-              height: isMobile ? 200 : 280,
+            Positioned(
+              bottom: isMobile ? -35 : -50,
+              left: 30,
+              child: Image.asset(
+                'perineometer.png',
+                height: isMobile ? 200 : 280,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: isMobile ? -20 : -30,
-            left: 100,
-            child: Image.asset(
-              'dialator.png',
-              height: isMobile ? 120 : 160,
+            Positioned(
+              bottom: isMobile ? -20 : -30,
+              left: 100,
+              child: Image.asset(
+                'dialator.png',
+                height: isMobile ? 120 : 160,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: -10,
-            left: 220,
-            child: Image.asset(
-              'product3.png',
-              height: isMobile ? 100 : 140,
+            Positioned(
+              bottom: -10,
+              left: 220,
+              child: Image.asset(
+                'product3.png',
+                height: isMobile ? 100 : 140,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 24,
-            right: 24,
-            child: Container(
-              height: 40,
-              width: 45,
-              decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: Border.all(width: 2, color: darkViolet),
-                  shape: BoxShape.circle),
-              child: IconButton(
-                  onPressed: () => context.go('/products'),
-                  icon: Icon(
-                    Icons.arrow_outward,
-                    color: darkViolet,
-                  )),
+            Positioned(
+              bottom: 24,
+              right: 24,
+              child: Container(
+                height: 40,
+                width: 45,
+                decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(width: 2, color: darkViolet),
+                    shape: BoxShape.circle),
+                child: IconButton(
+                    onPressed: () => context.go('/products'),
+                    icon: Icon(
+                      Icons.arrow_outward,
+                      color: darkViolet,
+                    )),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -285,7 +288,7 @@ class _RightCarousel extends StatelessWidget {
                       ),
                     ],
                   ),
-                  GestureDetector(
+                  InkWell(
                     onTap: () => context.go('/products/${product.id}'),
                     child: IntrinsicWidth(
                       child: Container(

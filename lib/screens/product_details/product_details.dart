@@ -367,16 +367,28 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             const SizedBox.shrink(),
           if (product?.isCDSCOCertified == true) SizedBox(height: 20),
 
-          // Price
-          Text(
-            product?.finalPrice != null
-                ? '₹${product!.finalPrice.toStringAsFixed(2)}'
-                : 'Price not available',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                '₹ ${product?.basePrice}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade400,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${product?.finalPrice}/-',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 16),
 

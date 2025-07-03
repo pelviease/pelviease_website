@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pelviease_website/backend/providers/blogs_provider.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/screens/blogs/widgets/blog_card.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,21 +60,17 @@ class _BlogsSectionState extends State<BlogsSection> {
             ),
             const SizedBox(height: 20),
             SizedBox(
-              height: 380,
+              height: 400,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
-                itemCount: blogProvider.blogs.length,
+                itemCount: blogProvider.blogs.length < 4
+                    ? blogProvider.blogs.length
+                    : 4,
                 separatorBuilder: (_, __) => const SizedBox(width: 20),
                 itemBuilder: (context, index) {
                   final blog = blogProvider.blogs[index];
-                  return BlogCard(
-                    postUrl: blog.postUrl,
-                    imagePath: blog.thumbnailUrl,
-                    title: blog.title,
-                    subtitle: blog.description,
-                    date: DateFormat('dd-MM-yyyy').format(blog.timestamp),
-                  );
+                  return BlogCard(blog: blog);
                 },
               ),
             ),
@@ -84,119 +81,119 @@ class _BlogsSectionState extends State<BlogsSection> {
   }
 }
 
-class BlogCard extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String subtitle;
-  final String date;
-  final String postUrl;
+// class BlogCard extends StatelessWidget {
+//   final String imagePath;
+//   final String title;
+//   final String subtitle;
+//   final String date;
+//   final String postUrl;
 
-  const BlogCard(
-      {super.key,
-      required this.imagePath,
-      required this.title,
-      required this.subtitle,
-      required this.date,
-      required this.postUrl});
+//   const BlogCard(
+//       {super.key,
+//       required this.imagePath,
+//       required this.title,
+//       required this.subtitle,
+//       required this.date,
+//       required this.postUrl});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 280,
-      padding: const EdgeInsets.all(16),
-      margin: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Blog Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imagePath,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 120,
-                width: double.infinity,
-                color: Colors.grey[200],
-                child: const Icon(Icons.broken_image,
-                    color: Colors.grey, size: 40),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Title
-          Text(title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(fontSize: 18, color: darkViolet)),
-          const SizedBox(height: 6),
-          // Subtitle
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black87,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          // Footer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Date Chip
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8D6E6),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  date,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: darkViolet,
-                  ),
-                ),
-              ),
-              TextButton(
-                  onPressed: () => _launchUrl(postUrl),
-                  child: Text(
-                    'Read More',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ))
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: 280,
+//       padding: const EdgeInsets.all(16),
+//       margin: EdgeInsets.symmetric(vertical: 10),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(18),
+//         boxShadow: const [
+//           BoxShadow(
+//             color: Colors.black12,
+//             blurRadius: 12,
+//             offset: Offset(0, 4),
+//           )
+//         ],
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//         children: [
+//           // Blog Image
+//           ClipRRect(
+//             borderRadius: BorderRadius.circular(12),
+//             child: Image.network(
+//               imagePath,
+//               height: 120,
+//               width: double.infinity,
+//               fit: BoxFit.cover,
+//               errorBuilder: (context, error, stackTrace) => Container(
+//                 height: 120,
+//                 width: double.infinity,
+//                 color: Colors.grey[200],
+//                 child: const Icon(Icons.broken_image,
+//                     color: Colors.grey, size: 40),
+//               ),
+//             ),
+//           ),
+//           const SizedBox(height: 12),
+//           // Title
+//           Text(title,
+//               style: Theme.of(context)
+//                   .textTheme
+//                   .titleLarge
+//                   ?.copyWith(fontSize: 18, color: darkViolet)),
+//           const SizedBox(height: 6),
+//           // Subtitle
+//           Text(
+//             subtitle,
+//             style: const TextStyle(
+//               fontSize: 13,
+//               color: Colors.black87,
+//             ),
+//             maxLines: 2,
+//             overflow: TextOverflow.ellipsis,
+//           ),
+//           const SizedBox(height: 12),
+//           // Footer
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               // Date Chip
+//               Container(
+//                 padding:
+//                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//                 decoration: BoxDecoration(
+//                   color: const Color(0xFFF8D6E6),
+//                   borderRadius: BorderRadius.circular(30),
+//                 ),
+//                 child: Text(
+//                   date,
+//                   style: const TextStyle(
+//                     fontSize: 12,
+//                     fontWeight: FontWeight.w500,
+//                     color: darkViolet,
+//                   ),
+//                 ),
+//               ),
+//               TextButton(
+//                   onPressed: () => _launchUrl(postUrl),
+//                   child: Text(
+//                     'Read More',
+//                     style: TextStyle(
+//                       fontSize: 13,
+//                       fontWeight: FontWeight.w500,
+//                       color: Colors.black87,
+//                     ),
+//                   ))
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  Future<void> _launchUrl(String url) async {
-    if (url.isNotEmpty && !await launchUrl(Uri.parse(url))) {
-      throw Exception('Could not launch $url');
-    }
-  }
-}
+//   Future<void> _launchUrl(String url) async {
+//     if (url.isNotEmpty && !await launchUrl(Uri.parse(url))) {
+//       throw Exception('Could not launch $url');
+//     }
+//   }
+// }

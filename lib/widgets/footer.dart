@@ -88,10 +88,10 @@ class _FooterSectionState extends State<FooterSection> {
           style: TextStyle(
             color: textColor,
             fontSize: isMobile
-                ? 8
+                ? 12
                 : isTablet
-                    ? 9
-                    : 10,
+                    ? 10
+                    : 14,
             height: 1.4,
             fontWeight: FontWeight.w600,
           ),
@@ -169,7 +169,7 @@ class _FooterSectionState extends State<FooterSection> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildCompanySection(
                           context, screenWidth, isMobile, isTablet),
@@ -337,7 +337,7 @@ class _FooterSectionState extends State<FooterSection> {
       }
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Products',
@@ -434,11 +434,16 @@ class _FooterSectionState extends State<FooterSection> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _socialIcon('assets/icons/youtube.png', '', isMobile),
+        _socialIcon('assets/icons/youtube.png',
+            'https://www.youtube.com/@Pelviease', isMobile),
         SizedBox(width: isMobile ? 10 : 15),
-        _socialIcon('assets/icons/linkedin.png', '', isMobile),
+        _socialIcon(
+            'assets/icons/linkedin.png',
+            'https://www.linkedin.com/company/techaro-innov-pvt-ltd/',
+            isMobile),
         SizedBox(width: isMobile ? 10 : 15),
-        _socialIcon('assets/icons/insta.png', '', isMobile),
+        _socialIcon('assets/icons/insta.png',
+            'https://www.instagram.com/pelviease', isMobile),
       ],
     );
   }

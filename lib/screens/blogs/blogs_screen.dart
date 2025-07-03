@@ -75,18 +75,11 @@ class BlogsScreenState extends State<BlogsScreen> {
                   ),
                 ),
                 SizedBox(height: isMobile ? 40 : 20),
-                SizedBox(
-                  height: isMobile
-                      ? size.height * 0.7
-                      : isTablet
-                          ? size.height * 0.65
-                          : size.height * 0.5,
-                  child: _buildCurrentTabContent(
-                    blogProvider,
-                    size,
-                    isMobile,
-                    isTablet,
-                  ),
+                _buildCurrentTabContent(
+                  blogProvider,
+                  size,
+                  isMobile,
+                  isTablet,
                 ),
                 const SizedBox(height: 24),
                 const FooterSection(),
@@ -120,7 +113,7 @@ class BlogsScreenState extends State<BlogsScreen> {
         break;
       case 3:
         filter = (blogs) =>
-            blogs.where((blog) => blog.blogType == 'successStories').toList();
+            blogs.where((blog) => blog.blogType == 'sucessStories').toList();
         break;
       default:
         filter = (blogs) => blogs;
@@ -160,6 +153,7 @@ class BlogsScreenState extends State<BlogsScreen> {
           );
         }
         final blogs = filter(snapshot.data!);
+
         return blogs.isEmpty
             ? const Center(
                 child: Text(
@@ -167,24 +161,22 @@ class BlogsScreenState extends State<BlogsScreen> {
                   style: TextStyle(color: textColor),
                 ),
               )
-            : SingleChildScrollView(
-                child: Center(
-                  child: Wrap(
-                    spacing: isMobile ? 16 : 24,
-                    runSpacing: isMobile ? 16 : 24,
-                    alignment: WrapAlignment.start,
-                    children: blogs.map((blog) {
-                      final cardWidth = isMobile
-                          ? size.width - 32
-                          : isTablet
-                              ? (size.width - 48) / 2
-                              : (size.width - 150) / 5;
-                      return SizedBox(
-                        width: cardWidth,
-                        child: BlogCard(blog: blog),
-                      );
-                    }).toList(),
-                  ),
+            : Center(
+                child: Wrap(
+                  spacing: isMobile ? 16 : 24,
+                  runSpacing: isMobile ? 16 : 24,
+                  alignment: WrapAlignment.start,
+                  children: blogs.map((blog) {
+                    final cardWidth = isMobile
+                        ? size.width - 32
+                        : isTablet
+                            ? (size.width - 48) / 2
+                            : (size.width - 150) / 5;
+                    return SizedBox(
+                      width: cardWidth,
+                      child: BlogCard(blog: blog),
+                    );
+                  }).toList(),
                 ),
               );
       },

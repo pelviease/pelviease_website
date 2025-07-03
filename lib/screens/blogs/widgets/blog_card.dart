@@ -19,11 +19,11 @@ class _BlogCardState extends State<BlogCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
+      width: 240,
       margin: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -34,7 +34,7 @@ class _BlogCardState extends State<BlogCard> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Blog Image
           ClipRRect(
@@ -44,7 +44,7 @@ class _BlogCardState extends State<BlogCard> {
               imageUrl: widget.blog.thumbnailUrl,
               height: 200,
               width: double.infinity,
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               placeholder: (context, url) => Container(
                 height: 200,
                 color: Colors.grey.shade300,
@@ -70,7 +70,10 @@ class _BlogCardState extends State<BlogCard> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.blog.title,
+                Text(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    widget.blog.title,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
