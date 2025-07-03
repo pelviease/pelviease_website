@@ -9,6 +9,7 @@ import 'package:pelviease_website/screens/home/widgets/products_hightlight_secti
 import 'package:pelviease_website/screens/home/widgets/testimonials_section.dart';
 import 'package:pelviease_website/screens/home/widgets/watch_our_content_section.dart';
 import 'package:pelviease_website/widgets/footer.dart';
+import 'package:pelviease_website/widgets/policies.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
