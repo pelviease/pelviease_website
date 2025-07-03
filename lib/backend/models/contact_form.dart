@@ -1,62 +1,50 @@
-class ContactForm {
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ContactModel {
+  final String? id;
   final String name;
-  final String email;
   final String? phone;
+  final String email;
   final String? company;
   final String subject;
   final String question;
-  final DateTime timestamp;
+  final Timestamp createdAt;
 
-  ContactForm({
+  ContactModel({
+    this.id,
     required this.name,
-    required this.email,
     this.phone,
+    required this.email,
     this.company,
     required this.subject,
     required this.question,
-    required this.timestamp,
+    required this.createdAt,
   });
 
+  // Convert model to Firestore document
   Map<String, dynamic> toMap() {
     return {
-      'Name': name.trim(),
-      'Email': email.trim().toLowerCase(),
-      'Phone': phone?.trim() ?? '',
-      'Company': company?.trim() ?? '',
-      'Subject': subject.trim(),
-      'Question': question.trim(),
-      'Timestamp': timestamp.toIso8601String(),
-      'Date': '${timestamp.day}/${timestamp.month}/${timestamp.year}',
-      'Time':
-          '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
+      'name': name,
+      'phone': phone,
+      'email': email,
+      'company': company,
+      'subject': subject,
+      'question': question,
+      'createdAt': createdAt,
     };
   }
 
-  List<String> toRowData() {
-    return [
-      name.trim(),
-      email.trim().toLowerCase(),
-      phone?.trim() ?? '',
-      company?.trim() ?? '',
-      subject.trim(),
-      question.trim(),
-      '${timestamp.day}/${timestamp.month}/${timestamp.year}',
-      '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}',
-      timestamp.toIso8601String(),
-    ];
-  }
-
-  static List<String> getHeaders() {
-    return [
-      'Name',
-      'Email',
-      'Phone',
-      'Company',
-      'Subject',
-      'Question',
-      'Date',
-      'Time',
-      'Timestamp',
-    ];
+  // Create model from Firestore document
+  factory ContactModel.fromMap(Map<String, dynamic> map, String id) {
+    return ContactModel(
+      id: id,
+      name: map['name'] as String,
+      phone: map['phone'] as String?,
+      email: map['email'] as String,
+      company: map['company'] as String?,
+      subject: map['subject'] as String,
+      question: map['question'] as String,
+      createdAt: map['createdAt'] as Timestamp,
+    );
   }
 }

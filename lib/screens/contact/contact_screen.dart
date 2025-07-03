@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pelviease_website/const/toaster.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/backend/providers/contact_provider.dart';
 import 'package:pelviease_website/widgets/footer.dart';
-import 'package:toastification/toastification.dart';
+import 'package:provider/provider.dart';
 
 // Assuming these are your theme colors
 const Color lightcyclamen = Color(0xFFF8C8DC);
@@ -276,6 +278,7 @@ class ContactForm extends StatefulWidget {
 }
 
 class _ContactFormState extends State<ContactForm> {
+  bool isSubmiting = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -283,6 +286,43 @@ class _ContactFormState extends State<ContactForm> {
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _questionController = TextEditingController();
+
+  void _submitForm(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.isAuthenticated == false) {
+      context.goNamed("authScreen");
+      return;
+    }
+
+    if (!context.mounted) return;
+    setState(() {
+      isSubmiting = true;
+    });
+
+    if (_formKey.currentState!.validate()) {
+      final provider = Provider.of<ContactProvider>(context, listen: false);
+      await provider.submitForm(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        email: _emailController.text,
+        company: _companyController.text,
+        subject: _subjectController.text,
+        question: _questionController.text,
+        context: context,
+      );
+    }
+    // clear all controller
+    _formKey.currentState!.reset();
+    _nameController.clear();
+    _phoneController.clear();
+    _emailController.clear();
+    _companyController.clear();
+    _subjectController.clear();
+    _questionController.clear();
+    setState(() {
+      isSubmiting = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -293,22 +333,6 @@ class _ContactFormState extends State<ContactForm> {
     _subjectController.dispose();
     _questionController.dispose();
     super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      // print('Name: ${_nameController.text}');
-      // print('Phone: ${_phoneController.text}');
-      // print('Email: ${_emailController.text}');
-      // print('Company: ${_companyController.text}');
-      // print('Subject: ${_subjectController.text}');
-      // print('Question: ${_questionController.text}');
-
-      showCustomToast(
-          title: 'Successful',
-          type: ToastificationType.success,
-          description: 'Form submitted successfully!');
-    }
   }
 
   @override
@@ -598,7 +622,7 @@ class _ContactFormState extends State<ContactForm> {
                 width: double.infinity,
                 height: 45,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () => _submitForm(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A2C6D),
                     foregroundColor: Colors.white,
