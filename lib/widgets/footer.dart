@@ -250,23 +250,60 @@ class _FooterSectionState extends State<FooterSection> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: isMobile ? 11 : 14,
-                        fontFamily: 'sans-serif',
-                      ),
-                      children: [
-                        const TextSpan(text: '© '),
-                        TextSpan(text: '${DateTime.now().year}'),
-                        const TextSpan(
-                          text:
-                              ' Pelviease. All rights reserved. Designed and Developed \n by @Octovu',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isMobile ? 11 : 14,
+                            fontFamily: 'sans-serif',
+                          ),
+                          children: [
+                            const TextSpan(text: '© '),
+                            TextSpan(text: '${DateTime.now().year}'),
+                            const TextSpan(
+                                text: ' Pelviease. All rights reserved.'),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text(
+                            'Designed and Developed by ',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: isMobile ? 10 : 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => _launchUrl('https://octovu.co'),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: darkViolet.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: darkViolet.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                '@Octovu',
+                                style: TextStyle(
+                                  color: darkViolet,
+                                  fontSize: isMobile ? 10 : 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
                   _buildSocialIcons(screenWidth, isMobile),
@@ -275,23 +312,60 @@ class _FooterSectionState extends State<FooterSection> {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: isMobile ? 11 : 14,
-                        fontFamily: 'sans-serif',
-                      ),
-                      children: [
-                        const TextSpan(text: '© '),
-                        TextSpan(text: '${DateTime.now().year}'),
-                        const TextSpan(
-                          text:
-                              ' Pelviease. All rights reserved. Designed and Developed by @Octovu',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isMobile ? 11 : 14,
+                            fontFamily: 'sans-serif',
+                          ),
+                          children: [
+                            const TextSpan(text: '© '),
+                            TextSpan(text: '${DateTime.now().year}'),
+                            const TextSpan(
+                                text: ' Pelviease. All rights reserved.'),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text(
+                            'Designed and Developed by ',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: isMobile ? 10 : 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => _launchUrl('https://octovu.co'),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: darkViolet.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                    color: darkViolet.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                '@Octovu',
+                                style: TextStyle(
+                                  color: darkViolet,
+                                  fontSize: isMobile ? 10 : 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   _buildSocialIcons(screenWidth, isMobile),
                 ],
@@ -478,57 +552,122 @@ class _FooterSectionState extends State<FooterSection> {
   }
 
   Widget _buildPoliciesSection() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 600;
+    bool isTablet = screenWidth >= 600 && screenWidth < 1200;
+
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(vertical: 14),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 10 : 14,
+        horizontal: isMobile ? 10 : 0,
+      ),
       decoration: BoxDecoration(
         color: darkViolet,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          InkWell(
-            onTap: () => context.go('/privacy-policy'),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Text(
-                'Privacy Policy',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
+      child: isMobile
+          ? Column(
+              children: [
+                InkWell(
+                  onTap: () => context.go('/privacy-policy'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Privacy Policy',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                InkWell(
+                  onTap: () => context.go('/terms-and-conditions'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Terms and Conditions',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () => context.go('/delivery-policy'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Delivery Policy',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InkWell(
+                  onTap: () => context.go('/privacy-policy'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Text(
+                      'Privacy Policy',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 14 : 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () => context.go('/terms-and-conditions'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Text(
+                      'Terms and Conditions',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 14 : 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () => context.go('/delivery-policy'),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Text(
+                      'Delivery Policy',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isTablet ? 14 : 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          InkWell(
-            onTap: () => context.go('/terms-and-conditions'),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Text(
-                'Terms and Conditions',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-              ),
-            )),
-          ),
-          InkWell(
-            onTap: () => context.go('/delivery-policy'),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Text(
-                'Delivery Policy',
-                style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-            )),
-          ),
-        ],
-      ),
     );
   }
 
