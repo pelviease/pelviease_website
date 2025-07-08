@@ -174,7 +174,7 @@ class AboutUsScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildHeroCard(
-          'assets/aboutus_images/image1.png',
+          'assets/team/about1.JPG',
           const Color(0xFFE3F2FD),
           screenHeight * 0.27,
           screenWidth * 0.17,
@@ -182,7 +182,7 @@ class AboutUsScreen extends StatelessWidget {
         ),
         const SizedBox(width: 15),
         _buildHeroCard(
-          'assets/aboutus_images/image2.png',
+          'assets/team/about2.jpg',
           const Color(0xFFFFE4E1),
           screenHeight * 0.2,
           screenWidth * 0.15,
@@ -190,7 +190,7 @@ class AboutUsScreen extends StatelessWidget {
         ),
         const SizedBox(width: 15),
         _buildHeroCard(
-          'assets/aboutus_images/image3.png',
+          'assets/team/about3.jpg',
           const Color(0xFFFFE4E1),
           screenHeight * 0.24,
           screenWidth * 0.11,
@@ -198,7 +198,7 @@ class AboutUsScreen extends StatelessWidget {
         ),
         const SizedBox(width: 15),
         _buildHeroCard(
-          'assets/aboutus_images/image4.png',
+          'assets/team/about4.jpg',
           const Color(0xFFE8F5E8),
           screenHeight * 0.25,
           screenWidth * 0.18,
@@ -264,7 +264,7 @@ class AboutUsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           const Text(
-            'PelviEase is India\'s leading Femtech brand, transforming pelvic health for women. We support your journey through incontinence, postpartum recovery, and pelvic wellness — with innovation and care.',
+            'To be the leading innovator in women’s health, empowering women through accessible, evidence-based medical technologies.\n ',
             style: TextStyle(
               fontSize: 16,
               height: 1.5,
@@ -309,7 +309,7 @@ class AboutUsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           const Text(
-            'At PelviEase, we innovate pelvic care devices, empower women through education, collaborate with health experts, and make advanced, affordable healthcare accessible to women across India.',
+            'To design and deliver smart, user-friendly diagnostic and rehabilitation devices that address pelvic health issues and postpartum health issues such as urinary incontinence, sexual dysfunction, and postpartum recovery: Diastasis recti , breast engorgement.',
             style: TextStyle(
               fontSize: 16,
               height: 1.5,
@@ -529,14 +529,14 @@ class AboutUsScreen extends StatelessWidget {
                         _buildTeamMember(
                           'NISHANTH KUMAR MARTHA',
                           'Chief Executive Officer',
-                          'assets/aboutus_images/nishanth.png',
+                          'assets/team/ceo.jpg',
                           isMobile,
                         ),
                         const SizedBox(height: 30),
                         _buildTeamMember(
                           'RUGVEDH GOPARI',
                           'Chief Technology Officer',
-                          'assets/aboutus_images/rugvedh.png',
+                          'assets/team/cto.jpg',
                           isMobile,
                         ),
                       ],
@@ -547,14 +547,14 @@ class AboutUsScreen extends StatelessWidget {
                         _buildTeamMember(
                           'NISHANTH KUMAR MARTHA',
                           'Chief Executive Officer',
-                          'assets/aboutus_images/nishanth.png',
+                          'assets/team/ceo.jpg',
                           isMobile,
                         ),
                         const SizedBox(width: 30),
                         _buildTeamMember(
                           'RUGVEDH GOPARI',
                           'Chief Technology Officer',
-                          'assets/aboutus_images/rugvedh.png',
+                          'assets/team/cto.jpg',
                           isMobile,
                         ),
                       ],
@@ -718,19 +718,19 @@ class _MobileHeroCardsPageViewState extends State<_MobileHeroCardsPageView> {
 
   final List<Map<String, dynamic>> _heroCards = [
     {
-      'imagePath': 'assets/aboutus_images/image1.png',
+      'imagePath': 'assets/team/about1.jpg',
       'backgroundColor': Color(0xFFE3F2FD),
     },
     {
-      'imagePath': 'assets/aboutus_images/image2.png',
+      'imagePath': 'assets/team/about2.jpg',
       'backgroundColor': Color(0xFFFFE4E1),
     },
     {
-      'imagePath': 'assets/aboutus_images/image3.png',
+      'imagePath': 'assets/team/about3.jpg',
       'backgroundColor': Color(0xFFFFE4E1),
     },
     {
-      'imagePath': 'assets/aboutus_images/image4.png',
+      'imagePath': 'assets/team/about4.jpg',
       'backgroundColor': Color(0xFFE8F5E8),
     },
   ];
