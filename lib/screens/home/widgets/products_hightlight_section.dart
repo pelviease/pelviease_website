@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/providers/product_provider.dart';
@@ -330,16 +331,24 @@ class _RightCarousel extends StatelessWidget {
               Align(
                 alignment:
                     isMobile ? Alignment.bottomRight : Alignment.centerRight,
-                child: Image.network(
-                  product.images.first,
+                child: CachedNetworkImage(
+                  imageUrl: product.images.first,
                   width: isMobile ? screenWidth * 0.345 : screenWidth * 0.17,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  errorWidget: (context, url, error) => Container(
                     width: isMobile ? 80 : screenWidth * 0.17,
                     height: isMobile ? 80 : screenWidth * 0.17,
                     color: Colors.grey[200],
                     child: Icon(Icons.broken_image,
                         color: Colors.grey, size: isMobile ? 40 : 60),
                   ),
+                  placeholder: (context, url) => Center(
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                  fit: BoxFit.contain,
                 ),
               ),
             ],
