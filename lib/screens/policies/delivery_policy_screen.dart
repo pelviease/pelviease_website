@@ -116,6 +116,7 @@ class DeliveryPolicyScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('• You must notify us within 48 hours of delivery', style: Theme.of(context).textTheme.bodyMedium),
+                          Text('• For approved returns, the replacement product will be delivered within 7-10 business days', style: Theme.of(context).textTheme.bodyMedium),
                           Text('• Product must be unused, unopened, and in original packaging', style: Theme.of(context).textTheme.bodyMedium),
                           Text('• Include images or videos showing the issue', style: Theme.of(context).textTheme.bodyMedium),
                           Text('• Include the original invoice/order confirmation email', style: Theme.of(context).textTheme.bodyMedium),
@@ -163,7 +164,7 @@ class DeliveryPolicyScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('• Once your return is received and inspected, we will notify you of the approval status', style: Theme.of(context).textTheme.bodyMedium),
-                          Text('• If approved, the refund will be initiated within 7–10 business days', style: Theme.of(context).textTheme.bodyMedium),
+                          Text('• If approved, the refund will be Credited within 7–10 business days', style: Theme.of(context).textTheme.bodyMedium),
                           Text('• For online payments, the amount will be refunded to the original payment method', style: Theme.of(context).textTheme.bodyMedium),
                           Text('• For Cash on Delivery, we will request your UPI or bank details for manual transfer', style: Theme.of(context).textTheme.bodyMedium),
                         ],
