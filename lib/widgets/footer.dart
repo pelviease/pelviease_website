@@ -465,7 +465,7 @@ class _FooterSectionState extends State<FooterSection> {
             ),
             SizedBox(width: isMobile ? 6 : 8),
             Text(
-              '+91 91826 64777',
+              '+91 90597 21427',
               style: TextStyle(
                 color: textColor,
                 fontSize: isMobile ? 11 : 13,
