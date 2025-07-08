@@ -35,3 +35,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// hosting command
+// firebase deploy --only hosting:pelviease-website
