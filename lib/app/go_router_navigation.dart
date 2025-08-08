@@ -10,6 +10,7 @@ import 'package:pelviease_website/screens/doctors/doctors_screen.dart';
 import 'package:pelviease_website/screens/home/home_screen.dart';
 import 'package:pelviease_website/screens/orders/checkout_screen.dart';
 import 'package:pelviease_website/screens/orders/order_screen.dart';
+import 'package:pelviease_website/screens/orders/payments/payment_test_screen.dart';
 import 'package:pelviease_website/screens/products/products_screen.dart';
 import 'package:pelviease_website/widgets/app_scaffold.dart';
 import 'package:provider/provider.dart';
@@ -73,7 +74,8 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/',
-          builder: (context, state) => const HomeScreen(),
+          // builder: (context, state) => const HomeScreen(),
+          builder: (context, state) => const PaymentTestScreen(),
         ),
         GoRoute(
           path: '/about',
@@ -137,7 +139,6 @@ final GoRouter appRouter = GoRouter(
             return PrivacyPolicyScreen();
           },
         ),
-
         GoRoute(
           path: '/terms-and-conditions',
           builder: (context, state) {
@@ -148,6 +149,12 @@ final GoRouter appRouter = GoRouter(
           path: '/delivery-policy',
           builder: (context, state) {
             return DeliveryPolicyScreen();
+          },
+        ),
+        GoRoute(
+          path: '/payment-test',
+          builder: (context, state) {
+            return const PaymentTestScreen();
           },
         ),
       ],
