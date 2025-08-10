@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import axios, {isAxiosError} from "axios";
 import {v4 as uuidv4} from "uuid";
+import {Timestamp} from "firebase-admin/firestore";
 
 // Interface for PhonePe order status response
 interface PhonePeOrderStatusResponse {
@@ -89,16 +90,37 @@ async function checkPhonePeOrderStatus(
       "Authorization": `O-Bearer ${accessToken}`,
     };
 
+    console.log("Checking payment status for:", merchantOrderId);
+    console.log("Using access token:", accessToken.substring(0, 20) +
+      "...");
+
     const options = {
       method: "GET",
       url: `${PHONEPE_HOST_URL}/checkout/v2/order/${merchantOrderId}/status`,
       headers: requestHeaders,
     };
 
+    console.log("Request options for checking payment status:",
+      JSON.stringify(options, null, 2));
+
     const response = await axios.request(options);
+
+    console.log("Full response from PhonePe:", JSON.stringify({
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    }, null, 2));
+
     return response.data;
   } catch (error) {
     console.error(`Error checking status for ${merchantOrderId}:`, error);
+    if (isAxiosError(error) && error.response) {
+      console.error("Axios error response:", JSON.stringify({
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      }, null, 2));
+    }
     // Don't throw HttpsError here, let the caller handle it
     throw error;
   }
@@ -155,7 +177,7 @@ export const initiatePhonePePayment = functions.https.onCall(
         merchantOrderId: merchantOrderId,
 
         amount: amount,
-        expireAfter: 1200, // 20 minutes
+        expireAfter: 300, // 5 minutes
         metaInfo: {
           udf1: userId,
           udf2: "Pelviease",
@@ -194,12 +216,7 @@ export const initiatePhonePePayment = functions.https.onCall(
       }
 
       const {orderId, redirectUrl, state, expireAt} = response.data;
-      console.log(
-        `Payment initiated successfully: ${orderId}`
-      );
-      console.log(
-        `Redirect URL: ${redirectUrl}`
-      );
+
       // 6. Save the pending transaction to Firestore
       await admin.firestore()
         .collection("transactions")
@@ -212,7 +229,8 @@ export const initiatePhonePePayment = functions.https.onCall(
           phonePeOrderId: orderId,
           state: state,
           expireAt: expireAt,
-          createdAt: admin.firestore.Timestamp.now(),
+          createdAt: Timestamp.now(),
+
         });
 
       // 7. Return the redirect URL to the client app
@@ -255,14 +273,21 @@ export const checkPaymentStatus = functions.https.onCall(
     ],
   },
   async (request) => {
+    console.log("=== checkPaymentStatus function called ===");
+    console.log("Request data:", JSON.stringify(request.data, null, 2));
+    console.log("Request auth:", request.auth ?
+      {uid: request.auth.uid} : "No auth");
+
     // 1. Validate input and user authentication
     if (!request.data?.merchantOrderId) {
+      console.error("Missing merchantOrderId in request");
       throw new functions.https.HttpsError(
         "invalid-argument",
         "The 'merchantOrderId' is required."
       );
     }
     if (!request.auth) {
+      console.error("No authentication provided");
       throw new functions.https.HttpsError(
         "unauthenticated",
         "You must be logged in to check a payment."
@@ -271,6 +296,9 @@ export const checkPaymentStatus = functions.https.onCall(
 
     const {merchantOrderId} = request.data;
     const userId = request.auth.uid;
+
+    console.log(`Processing payment status check for merchantOrderId: ${
+      merchantOrderId}, userId: ${userId}`);
 
     try {
       // 2. Verify that the transaction exists and belongs to the user
@@ -299,37 +327,63 @@ export const checkPaymentStatus = functions.https.onCall(
         accessToken
       );
 
+      console.log("Payment Status Response:",
+        JSON.stringify(statusResponse, null, 2));
+
       // Keep original status unless changed
       let finalStatus = transactionDoc.data()?.status;
 
       // 4. Update the transaction status in Firestore if it has changed
-      if (statusResponse.state && statusResponse.state !== "PENDING") {
-        finalStatus = statusResponse.state === "SUCCESS" ?
-          "SUCCESS" :
-          "FAILED";
+      // Check for various success states that PhonePe might return
+      const successStates = ["SUCCESS", "COMPLETED", "PAID"];
+      const failureStates = ["FAILED", "CANCELLED", "EXPIRED", "TIMEOUT"];
+
+      if (statusResponse.state) {
+        console.log(`Current state from PhonePe: ${statusResponse.state}`);
+
+        if (successStates.includes(
+          statusResponse.state.toUpperCase())) {
+          finalStatus = "SUCCESS";
+          console.log("Payment marked as SUCCESS");
+        } else if (failureStates.includes(
+          statusResponse.state.toUpperCase())) {
+          finalStatus = "FAILED";
+          console.log("Payment marked as FAILED");
+        } else if (statusResponse.state.toUpperCase() === "PENDING") {
+          finalStatus = "PENDING";
+          console.log("Payment still PENDING");
+        } else {
+          console.log(`Unknown payment state: ${statusResponse.state}`);
+        }
+
+        // Update Firestore with the latest status
         await transactionRef.update({
           status: finalStatus,
           finalState: statusResponse.state,
           latestStatusCheck: statusResponse,
-          lastStatusCheckAt: admin.firestore
-            .Timestamp.now(),
+          lastStatusCheckAt: admin.firestore.Timestamp.now(),
         });
       } else {
+        console.log("No state returned from PhonePe API");
         // Just log the check without changing the primary status
         await transactionRef.update({
           latestStatusCheck: statusResponse,
-          lastStatusCheckAt: admin.firestore
-            .Timestamp.now(),
+          lastStatusCheckAt: admin.firestore.Timestamp.now(),
         });
       }
 
       // 5. Return the latest status to the client
-      return {
+      const result = {
         merchantOrderId: merchantOrderId,
         status: finalStatus,
         // e.g., "SUCCESS", "FAILED", "PENDING"
         phonePeDetails: statusResponse,
       };
+
+      console.log("=== Returning result ===");
+      console.log("Result:", JSON.stringify(result, null, 2));
+
+      return result;
     } catch (error: unknown) {
       console.error("Error checking payment status:", error);
       // Re-throw known errors or create a generic one

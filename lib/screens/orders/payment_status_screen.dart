@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PaymentStatusScreen extends StatefulWidget {
   final String? transactionId;
@@ -105,8 +106,7 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> {
           const SizedBox(height: 40),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/', (Route<dynamic> route) => false);
+              context.go('/');
             },
             child: Text(isSuccess ? "Go to Home" : "Try Again"),
           )

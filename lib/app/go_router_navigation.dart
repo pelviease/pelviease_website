@@ -16,6 +16,7 @@ import 'package:pelviease_website/widgets/app_scaffold.dart';
 import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 
+import '../screens/orders/payment_status_screen.dart';
 import '../screens/policies/delivery_policy_screen.dart';
 import '../screens/policies/privacy_policy_screen.dart';
 import '../screens/policies/terms_and_conditions_screen.dart';
@@ -157,6 +158,12 @@ final GoRouter appRouter = GoRouter(
             return const PaymentTestScreen();
           },
         ),
+        GoRoute(
+            path: '/paymentStatus/:transactionId',
+            builder: (context, state) {
+              final transactionId = state.pathParameters['transactionId'];
+              return PaymentStatusScreen(transactionId: transactionId);
+            })
       ],
     ),
   ],

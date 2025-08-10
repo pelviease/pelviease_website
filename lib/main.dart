@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:pelviease_website/app/providers.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/const/firebase_config.dart';
 import 'package:pelviease_website/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -15,10 +14,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Connect to Firebase Functions emulator for local testing
-  if (kDebugMode) {
-    FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5002);
-  }
+  // Configure Firebase Functions (emulator vs production)
+  FirebaseConfig.configureFunctions();
 
   runApp(const MyApp());
 }

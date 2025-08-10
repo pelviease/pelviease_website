@@ -198,6 +198,7 @@ class OrderDetails {
   final String? deliveredBy;
   final String? trackingUrl;
   final double? discount;
+  final String? merchantOrderId;
 
   OrderDetails({
     this.id,
@@ -221,6 +222,7 @@ class OrderDetails {
     this.deliveryCode,
     this.deliveredBy,
     this.trackingUrl,
+    this.merchantOrderId,
   })  : orderDate = orderDate ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
         statusHistory = statusHistory ??
@@ -275,6 +277,7 @@ class OrderDetails {
       'deliveredBy': deliveredBy,
       'trackingUrl': trackingUrl,
       'discount': discount,
+      'merchantOrderId': merchantOrderId,
     };
   }
 
@@ -325,6 +328,7 @@ class OrderDetails {
         deliveredBy: data['deliveredBy'],
         trackingUrl: data['trackingUrl'],
         discount: data['discount'],
+        merchantOrderId: data['merchantOrderId'],
       );
     } catch (e) {
       return OrderDetails(
