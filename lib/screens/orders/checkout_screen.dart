@@ -10,6 +10,7 @@ import 'package:pelviease_website/backend/providers/checkout_provider.dart';
 import 'package:pelviease_website/const/enums/payment_enum.dart';
 import 'package:toastification/toastification.dart';
 import 'payments/payments_service.dart';
+import 'payment_order_data.dart';
 import 'widgets/add_address_dialog.dart';
 
 // Custom class to track CartItem and checkout status
@@ -729,47 +730,85 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   _calculateTotal(_checkoutItems, cartProvider);
               final amountInPaise = (totalInRupees * 100).round();
 
-              try {
-                final paymentService = PaymentService();
-                String? orderId;
+              // Check payment method to determine flow
+              if (checkoutProvider.selectedPaymentType == PaymentType.cash) {
+                // Cash on Delivery - Place order directly
                 try {
-                  // Initiate payment and get the order ID
-                  orderId = await paymentService.initiatePayment(
-                      amountInPaise: 100); // e.g., for ₹1.00
-                  // Store this orderId somewhere temporarily (e.g., in your state management solution)
-                  // so you can use it when the user returns to the app.
+                  final success = await checkoutProvider.placeOrder(
+                    cartItems: selectedItems,
+                    userId: userId,
+                    userName: userName,
+                    phoneNumber: phoneNumber,
+                    userFcmToken: "",
+                    discount: cartProvider.discount,
+                  );
 
-                  print("Order ID: $orderId");
+                  if (success) {
+                    // Clear the cart after successful order
+                    for (var item in selectedItems) {
+                      await cartProvider.removeItem(item.id);
+                    }
+
+                    showCustomToast(
+                        title: "Order Confirmed",
+                        description:
+                            "Your COD order has been placed successfully!",
+                        type: ToastificationType.success);
+
+                    context.go("/orders");
+                  } else {
+                    showCustomToast(
+                        title: "Order Failed",
+                        description: "Failed to place order. Please try again.",
+                        type: ToastificationType.error);
+                  }
                 } catch (e) {
-                  // Show an error message to the user
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(e.toString())));
+                  showCustomToast(
+                      title: "Order Failed",
+                      description: "Failed to place order: ${e.toString()}",
+                      type: ToastificationType.error);
                 }
-              } catch (e) {
-                showCustomToast(
-                    title: "Payment Failed",
-                    description: "Failed to initiate payment: ${e.toString()}",
-                    type: ToastificationType.error);
+              } else {
+                // Online Payment - Go through payment gateway
+                try {
+                  final paymentService = PaymentService();
+                  String? merchantOrderId;
+                  try {
+                    // Store order data before payment
+                    PaymentOrderData.instance.storeOrderData(
+                      cartItems: selectedItems,
+                      userId: userId,
+                      userName: userName,
+                      phoneNumber: phoneNumber,
+                      discount: cartProvider.discount,
+                    );
+
+                    // Initiate payment and get the merchant order ID
+                    merchantOrderId = await paymentService.initiatePayment(
+                        amountInPaise: amountInPaise);
+
+                    print("Merchant Order ID: $merchantOrderId");
+
+                    // Navigate to payment status screen to handle return flow
+                    context.go('/paymentStatus/$merchantOrderId');
+                  } catch (e) {
+                    // Clear stored data on failure
+                    PaymentOrderData.instance.clear();
+                    // Show an error message to the user
+                    showCustomToast(
+                        title: "Payment Failed",
+                        description:
+                            "Failed to initiate payment: ${e.toString()}",
+                        type: ToastificationType.error);
+                  }
+                } catch (e) {
+                  showCustomToast(
+                      title: "Payment Failed",
+                      description:
+                          "Failed to initiate payment: ${e.toString()}",
+                      type: ToastificationType.error);
+                }
               }
-              // final success = await checkoutProvider.placeOrder(
-              //   cartItems: selectedItems,
-              //   userId: userId,
-              //   userName: userName,
-              //   phoneNumber: phoneNumber,
-              //   userFcmToken: "",
-              //   discount: cartProvider.discount,
-              // );
-              // if (success) {
-              //   // Remove only selected items from cart
-              //   // for (var item in selectedItems) {
-              //   //   await cartProvider.removeItem(item.id);
-              //   // }
-              //   showCustomToast(
-              //       title: "Order Confirmed",
-              //       description: "Order placed successfully!",
-              //       type: ToastificationType.success);
-              //   // context.go("/orders");
-              // }
             },
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
@@ -783,13 +822,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.shopping_cart_checkout,
+          Icon(
+            checkoutProvider.selectedPaymentType == PaymentType.cash
+                ? Icons.delivery_dining
+                : Icons.payment,
             color: Colors.white,
           ),
           const SizedBox(width: 8),
           Text(
-            'Place Order • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}',
+            checkoutProvider.selectedPaymentType == PaymentType.cash
+                ? 'Place COD Order • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}'
+                : 'Pay Now • ₹ ${_calculateTotal(_checkoutItems, cartProvider).toStringAsFixed(2)}',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

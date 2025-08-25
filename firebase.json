@@ -37,6 +37,9 @@
     {
       "source": "functions",
       "codebase": "default",
+
+      "runtime": "nodejs22",
+      "gen": 1,
       "ignore": [
         "node_modules",
         ".git",
@@ -54,7 +57,6 @@
     "functions": {
       "port": 5002
     },
-
     "ui": {
       "enabled": true,
       "port": 4002

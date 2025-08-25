@@ -16,13 +16,35 @@ interface PhonePeOrderStatusResponse {
 admin.initializeApp();
 
 // --- PhonePe UAT (Test) Configuration ---
-const PHONEPE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
-const MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID;
-const CLIENT_ID = process.env.PHONEPE_CLIENT_ID;
-const CLIENT_SECRET = process.env.PHONEPE_CLIENT_SECRET;
 
-// The URL where the user is redirected after payment is complete
-const APP_REDIRECT_URL = "https://pelviease.com/#/orders";
+const functionConfig = functions.config();
+
+// const APP_CONFIG = functionConfig.app || {};
+// const PHONEPE_CONFIG = functionConfig.phonepe || {};
+// const PHONEPE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
+// const MERCHANT_ID = PHONEPE_CONFIG.merchant_id;
+// const CLIENT_ID = PHONEPE_CONFIG.merchant_id;
+// const CLIENT_SECRET = PHONEPE_CONFIG.salt_key;
+
+
+// --- Phone Production Configuration ---
+const PHONEPE_CONFIG_PROD = functionConfig.phonepe_prod || {};
+const APP_CONFIG_PROD = functionConfig.app_prod || {};
+const APP_PROD_REDIRECT_URL = APP_CONFIG_PROD.redirect_url || "https://pelviease.com/#/paymentStatus";
+const PHONEPE_PROD_HOST_URL = "https://api.phonepe.com/apis/pg/";
+const PHONEPE_PROD_AUTH_URL = "https://api.phonepe.com/apis/identity-manager/";
+
+const MERCHANT_ID_PROD = PHONEPE_CONFIG_PROD.merchant_id;
+const CLIENT_ID_PROD = PHONEPE_CONFIG_PROD.merchant_id;
+const CLIENT_SECRET_PROD = PHONEPE_CONFIG_PROD.salt_key;
+const SALT_INDEX_PROD = PHONEPE_CONFIG_PROD.salt_index || 1;
+console.log("PhonePe - MERCHANT_ID_PROD:", MERCHANT_ID_PROD);
+console.log("PhonePe - CLIENT_ID_PROD:", CLIENT_ID_PROD);
+console.log("PhonePe - CLIENT_SECRET_PROD:", CLIENT_SECRET_PROD);
+console.log("PhonePe - SALT_INDEX_PROD:", SALT_INDEX_PROD);
+
+// Use environment variable for flexibility between dev/prod
+const APP_REDIRECT_URL = APP_PROD_REDIRECT_URL;
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -35,7 +57,7 @@ const APP_REDIRECT_URL = "https://pelviease.com/#/orders";
  */
 async function getPhonePeAccessToken(): Promise<string> {
   try {
-    if (!CLIENT_ID || !CLIENT_SECRET) {
+    if (!CLIENT_ID_PROD || !CLIENT_SECRET_PROD) {
       throw new Error("CLIENT_ID and CLIENT_SECRET are required.");
     }
 
@@ -44,15 +66,15 @@ async function getPhonePeAccessToken(): Promise<string> {
     };
 
     const requestBody = new URLSearchParams({
-      "client_id": CLIENT_ID,
-      "client_secret": CLIENT_SECRET,
+      "client_id": CLIENT_ID_PROD,
+      "client_secret": CLIENT_SECRET_PROD,
       "client_version": "1",
       "grant_type": "client_credentials",
     }).toString();
 
     const options = {
       method: "POST",
-      url: `${PHONEPE_HOST_URL}/v1/oauth/token`,
+      url: `${PHONEPE_PROD_AUTH_URL}/v1/oauth/token`,
       headers: requestHeaders,
       data: requestBody,
     };
@@ -91,12 +113,12 @@ async function checkPhonePeOrderStatus(
     };
 
     console.log("Checking payment status for:", merchantOrderId);
-    console.log("Using access token:", accessToken.substring(0, 20) +
-      "...");
+
 
     const options = {
       method: "GET",
-      url: `${PHONEPE_HOST_URL}/checkout/v2/order/${merchantOrderId}/status`,
+      url: `${PHONEPE_PROD_HOST_URL}/checkout/v2/order/` +
+        `${merchantOrderId}/status`,
       headers: requestHeaders,
     };
 
@@ -121,7 +143,7 @@ async function checkPhonePeOrderStatus(
         data: error.response.data,
       }, null, 2));
     }
-    // Don't throw HttpsError here, let the caller handle it
+
     throw error;
   }
 }
@@ -137,16 +159,14 @@ async function checkPhonePeOrderStatus(
  * API Endpoint: POST /checkout/v2/pay
  */
 export const initiatePhonePePayment = functions.https.onCall(
-  {
-    secrets: [
-      "PHONEPE_MERCHANT_ID",
-      "PHONEPE_CLIENT_ID",
-      "PHONEPE_CLIENT_SECRET",
-    ],
-  },
   async (request) => {
     // 1. Validate input and user authentication
-    if (!MERCHANT_ID || !CLIENT_ID || !CLIENT_SECRET) {
+    if (!MERCHANT_ID_PROD || !CLIENT_ID_PROD || !CLIENT_SECRET_PROD) {
+      console.error("Missing PhonePe configuration:", {
+        MERCHANT_ID_PROD: !!MERCHANT_ID_PROD,
+        CLIENT_ID_PROD: !!CLIENT_ID_PROD,
+        CLIENT_SECRET_PROD: !!CLIENT_SECRET_PROD,
+      });
       throw new functions.https.HttpsError(
         "failed-precondition", "Server is not configured for payments."
       );
@@ -164,7 +184,7 @@ export const initiatePhonePePayment = functions.https.onCall(
       );
     }
 
-    const amount = Math.round(request.data.amount); // Amount in paise
+    const amount = Math.round(request.data.amount);
     const userId = request.auth.uid;
     const merchantOrderId = `ORDER-${uuidv4()}`;
 
@@ -177,7 +197,7 @@ export const initiatePhonePePayment = functions.https.onCall(
         merchantOrderId: merchantOrderId,
 
         amount: amount,
-        expireAfter: 300, // 5 minutes
+        expireAfter: 300, // 5 min
         metaInfo: {
           udf1: userId,
           udf2: "Pelviease",
@@ -186,9 +206,9 @@ export const initiatePhonePePayment = functions.https.onCall(
           type: "PG_CHECKOUT",
           message: "Payment for your service or product",
           merchantUrls: {
-            redirectUrl: `${APP_REDIRECT_URL}?order_id=${
-              merchantOrderId
-            }`,
+            // Redirect to payment status screen with merchantOrderId
+            // Format: https://pelviease.com/#/paymentStatus/{merchantOrderId}
+            redirectUrl: `${APP_REDIRECT_URL}/${merchantOrderId}`,
           },
         },
       };
@@ -196,7 +216,7 @@ export const initiatePhonePePayment = functions.https.onCall(
       // 4. Make the request to PhonePe to create the payment
       const options = {
         method: "POST",
-        url: `${PHONEPE_HOST_URL}/checkout/v2/pay`,
+        url: `${PHONEPE_PROD_HOST_URL}/checkout/v2/pay`,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `O-Bearer ${accessToken}`,
@@ -265,18 +285,11 @@ export const initiatePhonePePayment = functions.https.onCall(
  * Called by the client app after being redirected back from PhonePe.
  */
 export const checkPaymentStatus = functions.https.onCall(
-  {
-    secrets: [
-      "PHONEPE_MERCHANT_ID",
-      "PHONEPE_CLIENT_ID",
-      "PHONEPE_CLIENT_SECRET",
-    ],
-  },
   async (request) => {
     console.log("=== checkPaymentStatus function called ===");
     console.log("Request data:", JSON.stringify(request.data, null, 2));
-    console.log("Request auth:", request.auth ?
-      {uid: request.auth.uid} : "No auth");
+    // console.log("Request auth:", request.auth ?
+    //   {uid: request.auth.uid} : "No auth");
 
     // 1. Validate input and user authentication
     if (!request.data?.merchantOrderId) {
