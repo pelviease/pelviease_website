@@ -1,4 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,6 +19,16 @@ class PaymentService {
   Future<String> initiatePayment({required int amountInPaise}) async {
     if (kDebugMode) {
       print('Initiating payment for amount: $amountInPaise paise');
+    }
+
+    // Check if user is authenticated
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw 'User must be logged in to initiate payment';
+    }
+
+    if (kDebugMode) {
+      print('User authenticated: ${currentUser.uid}');
     }
 
     try {
@@ -88,6 +99,16 @@ class PaymentService {
       {required String merchantOrderId}) async {
     if (kDebugMode) {
       print('Checking payment status for merchantOrderId: $merchantOrderId');
+    }
+
+    // Check if user is authenticated
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw 'User must be logged in to check payment status';
+    }
+
+    if (kDebugMode) {
+      print('User authenticated: ${currentUser.uid}');
     }
 
     try {
