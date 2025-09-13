@@ -130,7 +130,11 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Center(
-                            child: Text('No testimonials available')),
+                          child: Text(
+                            'No testimonials available',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                       );
                     }
                     final testimony = testimonials[currentIndex];

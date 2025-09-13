@@ -75,8 +75,8 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/',
-          // builder: (context, state) => const HomeScreen(),
-          builder: (context, state) => const PaymentTestScreen(),
+          builder: (context, state) => const HomeScreen(),
+          // builder: (context, state) => const PaymentTestScreen(),
         ),
         GoRoute(
           path: '/about',
@@ -158,6 +158,22 @@ final GoRouter appRouter = GoRouter(
             return const PaymentTestScreen();
           },
         ),
+        GoRoute(
+            path: '/paymentStatus',
+            builder: (context, state) {
+              // Get transaction ID from query parameters
+              String? transactionId;
+
+              // Check if order_id is provided as a query parameter
+              if (state.uri.queryParameters.containsKey('order_id')) {
+                transactionId = state.uri.queryParameters['order_id'];
+              } else if (state.uri.queryParameters.isNotEmpty) {
+                // If no order_id, get the first query parameter key (for URLs like ?ORDER-123)
+                transactionId = state.uri.queryParameters.keys.first;
+              }
+
+              return PaymentStatusScreen(transactionId: transactionId);
+            }),
         GoRoute(
             path: '/paymentStatus/:transactionId',
             builder: (context, state) {
