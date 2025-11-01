@@ -58,13 +58,9 @@ class PaymentService {
 
         // 4. Launch the payment URL
         final uri = Uri.parse(redirectUrl);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          // 5. Return the merchant Order ID to the caller
-          return merchantOrderId;
-        } else {
-          throw 'Could not launch $redirectUrl';
-        }
+        await launchUrl(uri, webOnlyWindowName: '_self');
+        // 5. Return the merchant Order ID to the caller
+        return merchantOrderId;
       } else {
         throw 'Could not get redirect URL from Firebase.';
       }
