@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/screens/orders/payments/payments_service.dart';
-import 'package:pelviease_website/const/firebase_config.dart';
+import 'package:pelviease_website/const/razorpay_config.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -14,11 +14,12 @@ class PaymentTestScreen extends StatefulWidget {
 
 class _PaymentTestScreenState extends State<PaymentTestScreen> {
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _orderIdController = TextEditingController();
   bool _isLoading = false;
-  bool _isCheckingStatus = false;
   String? _message;
-  String? _statusMessage;
 
   @override
   void initState() {
@@ -50,25 +51,29 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
 
     try {
       final paymentService = PaymentService();
-      // Initiate payment and get the order ID
-      final orderId =
-          await paymentService.initiatePayment(amountInPaise: amount);
+
+      // Initiate payment - Razorpay modal will open automatically
+      final orderId = await paymentService.initiatePayment(
+        amountInPaise: amount,
+        userName: _nameController.text.isEmpty ? null : _nameController.text,
+        userEmail: _emailController.text.isEmpty ? null : _emailController.text,
+        userPhone: _phoneController.text.isEmpty ? null : _phoneController.text,
+        metaInfo: {
+          'test_mode': 'true',
+          'description': 'Test payment from Flutter web',
+        },
+      );
 
       setState(() {
-        _message = 'Payment initiated successfully!\n'
-            'Transaction ID: $orderId\n'
-            'Please complete the payment in the browser/app that opened.\n'
-            'After completing payment, you can check status below.';
+        _orderIdController.text = orderId;
+        _message = '✅ Payment initiated successfully!\n'
+            'Order ID: $orderId\n\n'
+            'The Razorpay checkout has opened.\n'
+            'Complete the payment to see the status update in Firebase.';
       });
-
-      // Auto-fill the order ID for status checking
-      _orderIdController.text = orderId;
-
-      // Note: Don't check status immediately after initiation
-      // The user needs time to complete the payment first
     } catch (e) {
       setState(() {
-        _message = 'Payment failed: $e';
+        _message = '❌ Payment initiation failed: $e';
       });
     } finally {
       setState(() {
@@ -77,45 +82,115 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
     }
   }
 
-  Future<void> _checkPaymentStatus() async {
+  Future<void> _refreshOrderStatus() async {
     if (_orderIdController.text.isEmpty) {
       setState(() {
-        _statusMessage = 'Please enter a transaction ID';
+        _message = 'Please enter an Order ID';
       });
       return;
     }
 
     setState(() {
-      _isCheckingStatus = true;
-      _statusMessage = null;
+      _isLoading = true;
+      _message = null;
     });
 
     try {
       final paymentService = PaymentService();
-      final paymentStatus = await paymentService.checkPaymentStatus(
-          merchantOrderId: _orderIdController.text.trim());
+      final transactionDetails = await paymentService.getTransactionDetails(
+        _orderIdController.text.trim(),
+      );
 
-      print("Payment Status: $paymentStatus");
+      if (transactionDetails == null) {
+        setState(() {
+          _message = '❌ Transaction not found';
+        });
+        return;
+      }
 
-      // Parse the status response
-      final status = paymentStatus['status'] as String?;
-      final phonePeDetails =
-          paymentStatus['phonePeDetails'] as Map<String, dynamic>?;
+      final status = transactionDetails['status'] as String?;
+      final amount = transactionDetails['amount'] as int?;
+      final createdAt = transactionDetails['createdAt'];
+      final razorpayPaymentId =
+          transactionDetails['razorpayPaymentId'] as String?;
 
-      String statusText = 'Status: ${status ?? 'Unknown'}\n';
-      if (phonePeDetails != null) {
-        statusText += 'PhonePe Details:\n';
-        statusText += 'Order ID: ${phonePeDetails['orderId'] ?? 'N/A'}\n';
-        statusText += 'State: ${phonePeDetails['state'] ?? 'N/A'}\n';
-        statusText += 'Amount: ${phonePeDetails['amount'] ?? 'N/A'}\n';
+      String statusText = '📊 Transaction Status\n\n';
+      statusText += 'Order ID: ${_orderIdController.text}\n';
+      statusText += 'Status: ${status ?? 'Unknown'}\n';
+      statusText +=
+          'Amount: ₹${amount != null ? (amount / 100).toStringAsFixed(2) : 'N/A'}\n';
+
+      if (razorpayPaymentId != null) {
+        statusText += 'Payment ID: $razorpayPaymentId\n';
+      }
+
+      if (createdAt != null) {
+        statusText += 'Created: ${createdAt.toDate()}\n';
+      }
+
+      // Add status-specific emoji
+      String emoji = '';
+      if (status == 'SUCCESS') {
+        emoji = '✅ ';
+      } else if (status == 'FAILED') {
+        emoji = '❌ ';
+      } else if (status == 'PENDING') {
+        emoji = '⏳ ';
+      } else if (status == 'CANCELLED') {
+        emoji = '🚫 ';
       }
 
       setState(() {
-        _statusMessage = statusText;
+        _message = emoji + statusText;
       });
     } catch (e) {
       setState(() {
-        _message = 'Payment failed: $e';
+        _message = '❌ Error fetching transaction: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadUserOrders() async {
+    setState(() {
+      _isLoading = true;
+      _message = null;
+    });
+
+    try {
+      final paymentService = PaymentService();
+      final transactions = await paymentService.getUserTransactions(limit: 10);
+
+      if (transactions.isEmpty) {
+        setState(() {
+          _message = '📭 No transactions found';
+        });
+        return;
+      }
+
+      String transactionsText =
+          '📋 Recent Transactions (${transactions.length})\n\n';
+      for (var i = 0; i < transactions.length; i++) {
+        final transaction = transactions[i];
+        final status = transaction['status'] as String?;
+        final amount = transaction['amount'] as int?;
+        final orderId = transaction['orderId'] as String?;
+
+        transactionsText += '${i + 1}. ${status ?? 'Unknown'} - ';
+        transactionsText +=
+            '₹${amount != null ? (amount / 100).toStringAsFixed(2) : 'N/A'}\n';
+        transactionsText += '   ID: ${orderId ?? 'N/A'}\n\n';
+      }
+
+      setState(() {
+        _message = transactionsText;
+      });
+    } catch (e) {
+      setState(() {
+        _message = '❌ Error loading transactions: $e';
       });
     } finally {
       setState(() {
@@ -191,11 +266,8 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(FirebaseConfig.isUsingEmulator
-                ? 'Payment Test (Local Emulator)'
-                : 'Payment Test (Production)'),
-            backgroundColor:
-                FirebaseConfig.isUsingEmulator ? Colors.orange : Colors.blue,
+            title: const Text('Razorpay Payment Test'),
+            backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
           ),
           body: Padding(
@@ -205,7 +277,7 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Test PhonePe Payment Integration',
+                    'Test Razorpay Payment Integration',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -247,60 +319,122 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  const Text(
-                    'Environment Configuration:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    FirebaseConfig.isUsingEmulator
-                        ? '🔧 Using Local Firebase Functions Emulator (localhost:5002)'
-                        : '🚀 Using Production Firebase Functions',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: FirebaseConfig.isUsingEmulator
-                          ? Colors.orange
-                          : Colors.green,
-                      fontWeight: FontWeight.w500,
+                  // Razorpay Configuration Info
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '💳 Payment Gateway: Razorpay',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Key ID: ${RazorpayConfig.keyId}',
+                          style: const TextStyle(
+                              fontSize: 12, fontFamily: 'monospace'),
+                        ),
+                        if (RazorpayConfig.keyId == 'YOUR_RAZORPAY_KEY_ID') ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              '⚠️ Please update RazorpayConfig.keyId with your actual Razorpay Key ID',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
+
+                  // Payment Form
+                  const Text(
+                    'Payment Details',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _amountController,
                     decoration: const InputDecoration(
                       labelText: 'Amount in paise (e.g., 1000 for ₹10)',
                       border: OutlineInputBorder(),
                       helperText: '1 Rupee = 100 paise',
+                      prefixIcon: Icon(Icons.currency_rupee),
                     ),
                     keyboardType: TextInputType.number,
                   ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Customer Name (Optional)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Customer Email (Optional)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _phoneController,
+                    decoration: const InputDecoration(
+                      labelText: 'Customer Phone (Optional)',
+                      border: OutlineInputBorder(),
+                      helperText: '10-digit number',
+                      prefixIcon: Icon(Icons.phone),
+                    ),
+                    keyboardType: TextInputType.phone,
+                  ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: _isLoading ? null : _testPayment,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: _isLoading
-                        ? const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Text('Processing...'),
-                            ],
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                        : const Text(
-                            'Test Payment',
-                            style: TextStyle(fontSize: 18),
-                          ),
+                        : const Icon(Icons.payment),
+                    label: Text(
+                      _isLoading ? 'Processing...' : 'Pay with Razorpay',
+                      style: const TextStyle(fontSize: 18),
+                    ),
                   ),
                   if (_message != null) ...[
                     const SizedBox(height: 20),
@@ -332,110 +466,83 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
                     ),
                   ],
 
-                  // Payment Status Checking Section
+                  // Order Management Section
                   const SizedBox(height: 30),
                   const Divider(),
                   const SizedBox(height: 20),
                   const Text(
-                    'Check Payment Status',
+                    'Order Management',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'After completing payment, enter the Transaction ID to check status:',
-                    style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _orderIdController,
                     decoration: const InputDecoration(
-                      labelText: 'Transaction ID',
+                      labelText: 'Order ID',
                       border: OutlineInputBorder(),
-                      helperText:
-                          'Enter the transaction ID from payment initiation',
+                      helperText: 'Enter order ID to check transaction status',
+                      prefixIcon: Icon(Icons.receipt_long),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _isCheckingStatus ? null : _checkPaymentStatus,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: _isCheckingStatus
-                        ? const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text('Checking Status...'),
-                            ],
-                          )
-                        : const Text('Check Payment Status'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _refreshOrderStatus,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh Status'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _loadUserOrders,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          icon: const Icon(Icons.list),
+                          label: const Text('My Orders'),
+                        ),
+                      ),
+                    ],
                   ),
-                  if (_statusMessage != null) ...[
-                    const SizedBox(height: 15),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: _statusMessage!.contains('SUCCESS')
-                            ? Colors.green.shade100
-                            : _statusMessage!.contains('FAILED')
-                                ? Colors.red.shade100
-                                : Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: _statusMessage!.contains('SUCCESS')
-                              ? Colors.green
-                              : _statusMessage!.contains('FAILED')
-                                  ? Colors.red
-                                  : Colors.blue,
-                        ),
-                      ),
-                      child: Text(
-                        _statusMessage!,
-                        style: TextStyle(
-                          color: _statusMessage!.contains('SUCCESS')
-                              ? Colors.green.shade800
-                              : _statusMessage!.contains('FAILED')
-                                  ? Colors.red.shade800
-                                  : Colors.blue.shade800,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
 
                   const SizedBox(height: 30),
                   const Divider(),
                   const SizedBox(height: 10),
                   const Text(
-                    'Instructions:',
+                    'How to Use:',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    FirebaseConfig.isUsingEmulator
-                        ? '🔧 EMULATOR MODE:\n'
-                            '1. Make sure Firebase Functions emulator is running:\n'
-                            '   firebase emulators:start --only functions\n\n'
-                            '2. The emulator should be running on localhost:5002\n\n'
-                            '3. Check the debug console for detailed logs\n\n'
-                            '4. Test with different amounts to verify functionality'
-                        : '🚀 PRODUCTION MODE:\n'
-                            '1. Connected to live Firebase Functions\n\n'
-                            '2. Real payments will be processed through PhonePe\n\n'
-                            '3. Make sure you are logged in\n\n'
-                            '4. Check Firebase Console for function logs if needed',
-                    style: const TextStyle(fontSize: 14),
+                  const Text(
+                    '1️⃣ Configure Razorpay:\n'
+                    '   • Get your Key ID from https://dashboard.razorpay.com\n'
+                    '   • Update lib/const/razorpay_config.dart\n\n'
+                    '2️⃣ Test Payment:\n'
+                    '   • Enter amount in paise (₹1 = 100 paise)\n'
+                    '   • Fill optional customer details for prefill\n'
+                    '   • Click "Pay with Razorpay"\n'
+                    '   • Razorpay checkout modal will open\n\n'
+                    '3️⃣ Check Status:\n'
+                    '   • After payment, use "Refresh Status" button\n'
+                    '   • Transaction status updates automatically in Firebase\n'
+                    '   • View all transactions with "My Transactions" button\n\n'
+                    '4️⃣ Test Cards:\n'
+                    '   • Success: 4111 1111 1111 1111\n'
+                    '   • Failure: 4000 0000 0000 0002\n'
+                    '   • Any future expiry & CVV\n\n'
+                    '📝 All transactions are stored in Firebase "transactions" collection\n'
+                    '🔍 Check browser console for detailed logs',
+                    style: TextStyle(fontSize: 13),
                   ),
                 ],
               ),
@@ -449,6 +556,9 @@ class _PaymentTestScreenState extends State<PaymentTestScreen> {
   @override
   void dispose() {
     _amountController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _orderIdController.dispose();
     super.dispose();
   }

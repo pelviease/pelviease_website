@@ -55,13 +55,12 @@ class _PaymentStatusScreenState extends State<PaymentStatusScreen> {
 
     try {
       final paymentService = PaymentService();
-      final paymentResult = await paymentService.checkPaymentStatus(
-          merchantOrderId: widget.transactionId!);
+      final transactionDetails =
+          await paymentService.getTransactionDetails(widget.transactionId!);
 
-      print("Payment Status Result: $paymentResult");
+      print("Transaction Details: $transactionDetails");
 
-      final status = paymentResult['status'] as String?;
-      // final phonePeDetails = paymentResult['phonePeDetails'] as Map<String, dynamic>?;
+      final status = transactionDetails?['status'] as String?;
 
       setState(() {
         _paymentStatus = status;
