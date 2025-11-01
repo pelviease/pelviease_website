@@ -21,6 +21,8 @@ class OrderService {
       if (userId != null) {
         query = query.where('userId', isEqualTo: userId);
       }
+      // Order results by orderDate descending
+      query = query.orderBy('orderDate', descending: true);
 
       final snapshot = await query.get();
 

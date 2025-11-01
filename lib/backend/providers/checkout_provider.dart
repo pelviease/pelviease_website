@@ -78,6 +78,7 @@ class CheckoutProvider with ChangeNotifier {
     required String phoneNumber,
     required String userFcmToken,
     required double discount,
+    String? orderId, // Optional orderId for online payments
   }) async {
     if (_selectedAddress == null) {
       _errorMessage = 'Please select a delivery address';
@@ -107,7 +108,7 @@ class CheckoutProvider with ChangeNotifier {
 
       // Create OrderDetails from cart items
       final orderDetails = OrderDetails.fromCartItems(
-        id: Uuid().v4(),
+        id: orderId ?? Uuid().v4(), // Use provided orderId or generate new one
         userId: userId,
         userName: userName,
         userFcmToken: userFcmToken,

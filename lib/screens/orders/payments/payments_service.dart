@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
 
 import 'dart:js_util';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -17,7 +18,8 @@ class PaymentService {
   /// This function:
   /// 1. Creates a transaction document in Firebase with PENDING status
   /// 2. Opens the Razorpay checkout UI
-  /// 3. On success, creates an order in the orders collection
+  /// 3. On success, calls the onSuccess callback
+  /// 4. On failure, calls the onFailure callback
   ///
   /// - [amountInPaise]: The amount to be paid in paise (₹1 = 100 paise).
   /// - [orderId]: Optional custom order ID. If not provided, will auto-generate.
@@ -26,8 +28,11 @@ class PaymentService {
   /// - [userName]: User's name for prefill (optional).
   /// - [metaInfo]: Additional metadata to store with the transaction (optional).
   /// - [orderData]: Additional order data to store in orders collection on success (optional).
+  /// - [onSuccess]: Callback function when payment is successful (optional).
+  /// - [onFailure]: Callback function when payment fails (optional).
+  /// - [onDismissed]: Callback function when payment is cancelled/dismissed (optional).
   ///
-  /// Returns the orderId on success.
+  /// Returns the orderId immediately after initiating payment.
   /// Throws an exception on failure.
   Future<String> initiatePayment({
     required int amountInPaise,
@@ -37,6 +42,9 @@ class PaymentService {
     String? userName,
     Map<String, dynamic>? metaInfo,
     Map<String, dynamic>? orderData,
+    Function(String orderId, String paymentId)? onSuccess,
+    Function(String orderId, String errorMessage)? onFailure,
+    Function(String orderId)? onDismissed,
   }) async {
     if (kDebugMode) {
       print(
@@ -60,9 +68,10 @@ class PaymentService {
 
     try {
       // Step 1: Generate orderId
-      final generatedOrderId = orderId ??
-          'ORDER-${DateTime.now().millisecondsSinceEpoch}-${currentUser.uid.substring(0, 8)}';
+      // final generatedOrderId = orderId ??
+      //     'PELVIEASE-${DateTime.now().millisecondsSinceEpoch}-${currentUser.uid.substring(0, 4)}';
 
+      final generatedOrderId = generateOrderId(currentUser.uid);
       // Step 2: Create transaction document in Firebase with PENDING status
       final transactionRef =
           _firestore.collection('transactions').doc(generatedOrderId);
@@ -98,10 +107,9 @@ class PaymentService {
         name: RazorpayConfig.companyName,
         description: 'Order #$generatedOrderId',
         image: RazorpayConfig.companyLogo,
-        order_id:
-            null, // Optional: Create Razorpay order on backend for extra security
+        order_id: null,
         handler: allowInterop((response) {
-          _handlePaymentSuccess(response, generatedOrderId);
+          _handlePaymentSuccess(response, generatedOrderId, onSuccess);
         }),
         prefill: jsify({
           'name': userName ?? currentUser.displayName ?? '',
@@ -114,7 +122,7 @@ class PaymentService {
         }),
         modal: jsify({
           'ondismiss': allowInterop(() {
-            _handlePaymentDismissed(generatedOrderId);
+            _handlePaymentDismissed(generatedOrderId, onDismissed);
           }),
         }),
       );
@@ -123,7 +131,7 @@ class PaymentService {
       final razorpay = Razorpay(options);
 
       razorpay.on('payment.failed', allowInterop((errorResponse) {
-        _handlePaymentFailure(errorResponse, generatedOrderId);
+        _handlePaymentFailure(errorResponse, generatedOrderId, onFailure);
       }));
 
       // Step 5: Open Razorpay checkout
@@ -142,9 +150,35 @@ class PaymentService {
     }
   }
 
+  ///Generate a unique order ID
+  ///
+  /// - [currentUser]: The current authenticated user
+  String generateOrderId(String uid) {
+    final prefix = 'PELVIEASE';
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final uidPart = uid.substring(0, 6);
+
+    final buffer = StringBuffer();
+
+    // Mix characters: take one from timestamp, then one from uidPart, repeatedly
+    final maxLength =
+        timestamp.length > uidPart.length ? timestamp.length : uidPart.length;
+
+    for (int i = 0; i < maxLength; i++) {
+      if (i < timestamp.length) buffer.write(timestamp[i]);
+      if (i < uidPart.length) buffer.write(uidPart[i]);
+    }
+
+    return '$prefix-${buffer.toString()}';
+  }
+
   /// Handles successful payment
   /// Updates transaction and creates order in orders collection
-  void _handlePaymentSuccess(dynamic response, String orderId) async {
+  void _handlePaymentSuccess(
+    dynamic response,
+    String orderId,
+    Function(String orderId, String paymentId)? onSuccess,
+  ) async {
     try {
       final paymentId = getProperty(response, 'razorpay_payment_id') as String?;
       final razorpayOrderId =
@@ -159,16 +193,16 @@ class PaymentService {
       }
 
       // Get transaction data to retrieve orderData
-      final transactionDoc =
-          await _firestore.collection('transactions').doc(orderId).get();
-      final transactionData = transactionDoc.data();
-      final orderData = transactionData?['orderData'] as Map<String, dynamic>?;
-      final amount = transactionData?['amount'] as int?;
-      final userId = transactionData?['userId'] as String?;
-      final userEmail = transactionData?['userEmail'] as String?;
-      final userName = transactionData?['userName'] as String?;
-      final userPhone = transactionData?['userPhone'] as String?;
-      final metaInfo = transactionData?['metaInfo'] as Map<String, dynamic>?;
+      // final transactionDoc =
+      //     await _firestore.collection('transactions').doc(orderId).get();
+      // final transactionData = transactionDoc.data();
+      // final orderData = transactionData?['orderData'] as Map<String, dynamic>?;
+      // final amount = transactionData?['amount'] as int?;
+      // final userId = transactionData?['userId'] as String?;
+      // final userEmail = transactionData?['userEmail'] as String?;
+      // final userName = transactionData?['userName'] as String?;
+      // final userPhone = transactionData?['userPhone'] as String?;
+      // final metaInfo = transactionData?['metaInfo'] as Map<String, dynamic>?;
 
       // Update transaction in Firebase
       await _firestore.collection('transactions').doc(orderId).update({
@@ -185,39 +219,34 @@ class PaymentService {
         print('📝 Transaction updated in Firebase with SUCCESS status');
       }
 
-      // Create order in orders collection with same orderId
-      final orderDocument = {
-        'orderId': orderId,
-        'userId': userId,
-        'amount': amount,
-        'currency': RazorpayConfig.currency,
-        'status': 'PAID',
-        'paymentStatus': 'SUCCESS',
-        'paymentGateway': 'razorpay',
-        'razorpayPaymentId': paymentId,
-        'razorpayOrderId': razorpayOrderId,
-        'razorpaySignature': signature,
-        'createdAt': FieldValue.serverTimestamp(),
-        'paidAt': FieldValue.serverTimestamp(),
-        if (userEmail != null) 'userEmail': userEmail,
-        if (userName != null) 'userName': userName,
-        if (userPhone != null) 'userPhone': userPhone,
-        if (metaInfo != null) 'metaInfo': metaInfo,
-        // Merge any additional order data provided during initiation
-        if (orderData != null) ...orderData,
-      };
+      // // Create order in orders collection with same orderId
+      // final orderDocument = {
+      //   'orderId': orderId,
+      //   'userId': userId,
+      //   'amount': amount,
+      //   'currency': RazorpayConfig.currency,
+      //   'status': 'PAID',
+      //   'paymentStatus': 'SUCCESS',
+      //   'paymentGateway': 'razorpay',
+      //   'razorpayPaymentId': paymentId,
+      //   'razorpayOrderId': razorpayOrderId,
+      //   'razorpaySignature': signature,
+      //   'createdAt': FieldValue.serverTimestamp(),
+      //   'paidAt': FieldValue.serverTimestamp(),
+      //   if (userEmail != null) 'userEmail': userEmail,
+      //   if (userName != null) 'userName': userName,
+      //   if (userPhone != null) 'userPhone': userPhone,
+      //   if (metaInfo != null) 'metaInfo': metaInfo,
+      //   // Merge any additional order data provided during initiation
+      //   if (orderData != null) ...orderData,
+      // };
 
-      await _firestore.collection('orders').doc(orderId).set(orderDocument);
+      // await _firestore.collection('orders').doc(orderId).set(orderDocument);
 
-      if (kDebugMode) {
-        print('📦 Order created in orders collection with orderId: $orderId');
+      // Call success callback if provided
+      if (onSuccess != null && paymentId != null) {
+        onSuccess(orderId, paymentId);
       }
-
-      // TODO: You can trigger additional actions here like:
-      // - Show success message to user
-      // - Navigate to order confirmation page
-      // - Send confirmation email
-      // - Update inventory
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling payment success: $e');
@@ -226,7 +255,11 @@ class PaymentService {
   }
 
   /// Handles payment failure
-  void _handlePaymentFailure(dynamic errorResponse, String orderId) async {
+  void _handlePaymentFailure(
+    dynamic errorResponse,
+    String orderId,
+    Function(String orderId, String errorMessage)? onFailure,
+  ) async {
     try {
       final code = getProperty(errorResponse, 'code') as String? ?? 'unknown';
       final description =
@@ -263,7 +296,10 @@ class PaymentService {
         print('📝 Transaction updated in Firebase with FAILED status');
       }
 
-      // TODO: Show error message to user
+      // Call failure callback if provided
+      if (onFailure != null) {
+        onFailure(orderId, description);
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling payment failure: $e');
@@ -272,7 +308,10 @@ class PaymentService {
   }
 
   /// Handles when user dismisses the payment modal
-  void _handlePaymentDismissed(String orderId) async {
+  void _handlePaymentDismissed(
+    String orderId,
+    Function(String orderId)? onDismissed,
+  ) async {
     try {
       if (kDebugMode) {
         print('⚠️ Payment modal dismissed by user');
@@ -287,6 +326,11 @@ class PaymentService {
 
       if (kDebugMode) {
         print('📝 Transaction updated in Firebase with CANCELLED status');
+      }
+
+      // Call dismissed callback if provided
+      if (onDismissed != null) {
+        onDismissed(orderId);
       }
     } catch (e) {
       if (kDebugMode) {

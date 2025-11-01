@@ -772,41 +772,92 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Online Payment - Go through payment gateway
                 try {
                   final paymentService = PaymentService();
-                  String? merchantOrderId;
-                  try {
-                    // Store order data before payment
-                    PaymentOrderData.instance.storeOrderData(
-                      cartItems: selectedItems,
-                      userId: userId,
-                      userName: userName,
-                      phoneNumber: phoneNumber,
-                      discount: cartProvider.discount,
-                    );
 
-                    // Initiate payment and get the merchant order ID
-                    merchantOrderId = await paymentService.initiatePayment(
-                        amountInPaise: amountInPaise);
+                  // Store order data before payment
+                  PaymentOrderData.instance.storeOrderData(
+                    cartItems: selectedItems,
+                    userId: userId,
+                    userName: userName,
+                    phoneNumber: phoneNumber,
+                    discount: cartProvider.discount,
+                  );
 
-                    print("Merchant Order ID: $merchantOrderId");
+                  // Initiate payment with callbacks
+                  await paymentService.initiatePayment(
+                    amountInPaise: amountInPaise - 500,
+                    onSuccess: (orderId, paymentId) async {
+                      // Payment successful - place the order
+                      try {
+                        final success = await checkoutProvider.placeOrder(
+                          cartItems: selectedItems,
+                          userId: userId!,
+                          userName: userName!,
+                          phoneNumber: phoneNumber!,
+                          userFcmToken: "",
+                          discount: cartProvider.discount,
+                          orderId: orderId, // Pass the Razorpay orderId
+                        );
 
-                    // Navigate to payment status screen to handle return flow
-                    context.go('/paymentStatus/$merchantOrderId');
-                  } catch (e) {
-                    // Clear stored data on failure
-                    PaymentOrderData.instance.clear();
-                    // Show an error message to the user
-                    showCustomToast(
+                        if (success) {
+                          // Clear the cart after successful order
+                          for (var item in selectedItems) {
+                            await cartProvider.removeItem(item.id);
+                          }
+
+                          // Clear stored payment data
+                          PaymentOrderData.instance.clear();
+
+                          showCustomToast(
+                            title: "Payment Successful",
+                            description:
+                                "Your order has been placed successfully!",
+                            type: ToastificationType.success,
+                          );
+
+                          // Navigate to orders page
+                          context.go("/orders");
+                        } else {
+                          showCustomToast(
+                            title: "Order Failed",
+                            description:
+                                "Payment was successful but order placement failed. Please contact support.",
+                            type: ToastificationType.error,
+                          );
+                        }
+                      } catch (e) {
+                        showCustomToast(
+                          title: "Order Failed",
+                          description: "Failed to place order: ${e.toString()}",
+                          type: ToastificationType.error,
+                        );
+                      }
+                    },
+                    onFailure: (orderId, errorMessage) {
+                      // Payment failed
+                      PaymentOrderData.instance.clear();
+                      showCustomToast(
                         title: "Payment Failed",
-                        description:
-                            "Failed to initiate payment: ${e.toString()}",
-                        type: ToastificationType.error);
-                  }
+                        description: errorMessage,
+                        type: ToastificationType.error,
+                      );
+                    },
+                    onDismissed: (orderId) {
+                      // Payment cancelled by user
+                      PaymentOrderData.instance.clear();
+                      showCustomToast(
+                        title: "Payment Cancelled",
+                        description: "You cancelled the payment",
+                        type: ToastificationType.info,
+                      );
+                    },
+                  );
                 } catch (e) {
+                  PaymentOrderData.instance.clear();
                   showCustomToast(
-                      title: "Payment Failed",
-                      description:
-                          "Failed to initiate payment: ${e.toString()}",
-                      type: ToastificationType.error);
+                    title: "Payment Failed",
+                    description: "Failed to initiate payment: ${e.toString()}",
+                    type: ToastificationType.error,
+                  );
                 }
               }
             },

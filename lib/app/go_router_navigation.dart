@@ -75,8 +75,8 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/',
-          // builder: (context, state) => const HomeScreen(),
-          builder: (context, state) => const PaymentTestScreen(),
+          builder: (context, state) => const HomeScreen(),
+          // builder: (context, state) => const PaymentTestScreen(),
         ),
         GoRoute(
           path: '/about',
