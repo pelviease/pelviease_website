@@ -1,7 +1,5 @@
 /// Razorpay configuration
 class RazorpayConfig {
-  // TODO: Replace with your actual Razorpay Key ID from the Razorpay Dashboard
-  // Get it from: https://dashboard.razorpay.com/app/website-app-settings/api-keys
   static const String keyId = 'rzp_live_RaOaf36BIMcIoT';
 
   // Company/Business details
