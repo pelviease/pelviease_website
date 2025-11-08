@@ -1,460 +1,208 @@
 import * as functions from "firebase-functions/v2";
 import * as admin from "firebase-admin";
-import axios, {isAxiosError} from "axios";
-import {v4 as uuidv4} from "uuid";
+import axios from "axios";
 import {Timestamp} from "firebase-admin/firestore";
 import {defineSecret} from "firebase-functions/params";
 import {CallableRequest} from "firebase-functions/v2/https";
 
-// Interface for PhonePe order status response
-interface PhonePeOrderStatusResponse {
-  orderId?: string;
-  state?: string;
-  amount?: number;
-  [key: string]: unknown;
-}
-
-// Interface for payment request data
-interface PaymentRequestData {
-  amount: number;
-}
-
-// Interface for status check request data
-interface StatusCheckRequestData {
-  merchantOrderId: string;
-}
-
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 
-// --- Define secrets using the new approach ---
-const phonePeMerchantId = defineSecret("PHONEPE_MERCHANT_ID");
-const phonePeClientId = defineSecret("PHONEPE_CLIENT_ID");
-const phonePeClientSecret = defineSecret("PHONEPE_SALT_KEY");
+// --- Define Razorpay secrets ---
+const razorpayKeyId = defineSecret("RAZORPAY_KEY_ID");
+const razorpayKeySecret = defineSecret("RAZORPAY_KEY_SECRET");
 
-const PHONEPE_PROD_HOST_URL = "https://api.phonepe.com/apis/pg";
-const PHONEPE_PROD_AUTH_URL = "https://api.phonepe.com/apis/identity-manager";
-
-// The URL where the user is redirected after payment is complete
-const APP_REDIRECT_URL = "https://pelviease.com/#/paymentStatus";
-
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Gets an OAuth access token from the PhonePe API.
- * API Endpoint: POST /v1/oauth/token
- * @param {string} clientId - The PhonePe client ID.
- * @param {string} clientSecret - The PhonePe client secret.
- * @return {Promise<string>} The access token.
- */
-async function
-getPhonePeAccessToken(clientId: string, clientSecret: string):
-  Promise<string> {
-  try {
-    if (!clientId || !clientSecret) {
-      throw new Error("CLIENT_ID and CLIENT_SECRET are required.");
-    }
-
-    const requestHeaders = {
-      "Content-Type": "application/x-www-form-urlencoded",
-    };
-
-    const requestBody = new URLSearchParams({
-      "client_id": clientId,
-      "client_secret": clientSecret,
-      "client_version": "1",
-      "grant_type": "client_credentials",
-    })
-      .toString();
-
-    const options = {
-      method: "POST",
-      url:
-        `${PHONEPE_PROD_AUTH_URL}/v1/oauth/token`,
-      headers: requestHeaders,
-      data: requestBody,
-    };
-
-    console.log("Requesting access token from PhonePe...");
-    const response = await axios.request(options);
-
-    if (!response.data?.access_token) {
-      throw new Error("No access token received from PhonePe");
-    }
-
-    console.log("Successfully obtained access token");
-    return response.data.access_token;
-  } catch (error) {
-    console.error("Error getting PhonePe access token:", error);
-    throw new functions.https.HttpsError(
-      "internal",
-      "Failed to authenticate with PhonePe."
-    );
-  }
+// Interface for Razorpay order creation request
+interface RazorpayOrderRequest {
+  amount: number; // Amount in paise
+  currency?: string;
+  receipt?: string;
+  notes?: {[key: string]: string};
 }
 
-/**
- * Checks the status of an order with the PhonePe API.
- * API Endpoint: GET /checkout/v2/order/{merchantOrderId}/status
- * @param {string} merchantOrderId - The unique ID for the order in your system.
- * @param {string} accessToken - The PhonePe access token.
- * @return {Promise<PhonePeOrderStatusResponse>} The order status response.
- */
-async function checkPhonePeOrderStatus(
-  merchantOrderId: string,
-  accessToken: string
-): Promise<PhonePeOrderStatusResponse> {
-  try {
-    const requestHeaders = {
-      "Content-Type": "application/json",
-      "Authorization": `O-Bearer ${accessToken}`,
-    };
-
-    console.log("Checking payment status for:", merchantOrderId);
-    console.log(
-      "Using access token:",
-      accessToken.substring(0, 20) + "..."
-    );
-
-    const options = {
-      method: "GET",
-      url:
-        `${PHONEPE_PROD_HOST_URL}/checkout/v2/order/${merchantOrderId}/status`,
-      headers: requestHeaders,
-    };
-
-    console.log(
-      "Request options for checking payment status:",
-      JSON.stringify(options, null, 2)
-    );
-
-    const response = await axios.request(options);
-
-    console.log(
-      "Full response from PhonePe:",
-      JSON.stringify(
-        {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.data,
-        },
-        null,
-        2
-      )
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error(`Error checking status for ${merchantOrderId}:`, error);
-    if (isAxiosError(error) && error.response) {
-      console.error(
-        "Axios error response:",
-        JSON.stringify(
-          {
-            status: error.response.status,
-            statusText: error.response.statusText,
-            data: error.response.data,
-          },
-          null,
-          2
-        )
-      );
-    }
-    // Don't throw HttpsError here, let the caller handle it
-    throw error;
-  }
+// Interface for Razorpay order response
+interface RazorpayOrderResponse {
+  id: string;
+  entity: string;
+  amount: number;
+  amount_paid: number;
+  amount_due: number;
+  currency: string;
+  receipt: string;
+  status: string;
+  attempts: number;
+  notes: {[key: string]: string};
+  created_at: number;
 }
 
 // =============================================================================
-// CALLABLE CLOUD FUNCTIONS
+// RAZORPAY CLOUD FUNCTIONS
 // =============================================================================
 
 /**
- * Initiates a payment with PhonePe.
- * Called by the client app to get a redirect URL for payment.
- * API Endpoint: POST /checkout/v2/pay
+ * Creates a Razorpay Order on the backend.
+ * This order ID is then used in the frontend checkout.
+ * API Endpoint: POST https://api.razorpay.com/v1/orders
  */
-export const initiatePhonePePayment = functions.https.onCall({
-  secrets: [phonePeMerchantId, phonePeClientId, phonePeClientSecret],
-}, async (request: CallableRequest<PaymentRequestData>) => {
+export const createRazorpayOrder = functions.https.onCall({
+  secrets: [razorpayKeyId, razorpayKeySecret],
+}, async (request: CallableRequest<RazorpayOrderRequest>) => {
+  console.log("=== createRazorpayOrder function called ===");
+  console.log("Request data:", JSON.stringify(request.data, null, 2));
+  console.log(
+    "Request auth:",
+    request.auth ? {uid: request.auth.uid} : "No auth"
+  );
+
   // Get secret values
-  const MERCHANT_ID = phonePeMerchantId.value();
-  const CLIENT_ID = phonePeClientId.value();
-  const CLIENT_SECRET = phonePeClientSecret.value();
+  const KEY_ID = razorpayKeyId.value();
+  const KEY_SECRET = razorpayKeySecret.value();
 
-  console.log("PhonePe Configuration:");
-  console.log(
-    "MERCHANT_ID:", MERCHANT_ID ? "***SET***" : "undefined"
-  );
-  console.log(
-    "CLIENT_ID:", CLIENT_ID ? "***SET***" : "undefined"
-  );
-  console.log(
-    "CLIENT_SECRET:", CLIENT_SECRET ? "***SET***" : "undefined"
-  );
+  console.log("Razorpay Configuration:");
+  console.log("KEY_ID:", KEY_ID ? "***SET***" : "undefined");
+  console.log("KEY_SECRET:", KEY_SECRET ? "***SET***" : "undefined");
 
   // 1. Validate input and user authentication
-  if (!CLIENT_ID || !CLIENT_SECRET) {
+  if (!KEY_ID || !KEY_SECRET) {
+    console.error("Razorpay credentials not configured");
     throw new functions.https.HttpsError(
       "failed-precondition",
-      "Server is not configured for payments."
+      "Server is not configured for Razorpay payments."
     );
   }
+
+  if (!request.auth) {
+    console.error("No authentication provided");
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "You must be logged in to create an order."
+    );
+  }
+
   if (
     !request.data ||
     typeof request.data.amount !== "number" ||
     request.data.amount <= 0
   ) {
+    console.error("Invalid amount:", request.data?.amount);
     throw new functions.https.HttpsError(
       "invalid-argument",
-      "A valid amount is required."
-    );
-  }
-  if (!request.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "You must be logged in to make a payment."
+      "A valid amount in paise is required."
     );
   }
 
-  const amount = Math.round(request.data.amount); // Amount in paise
   const userId = request.auth.uid;
-  const merchantOrderId = `ORDER-${uuidv4()}`;
+  const amount = Math.round(request.data.amount); // Amount in paise
+  const currency = request.data.currency || "INR";
+  const receipt =
+    request.data.receipt || `receipt_${Date.now()}`;
+  const notes = request.data.notes || {};
+
+  console.log(
+    `Creating Razorpay order for userId: ${userId}, ` +
+    `amount: ${amount} paise`
+  );
 
   try {
-    // 2. Get PhonePe Access Token
-    const accessToken = await getPhonePeAccessToken(MERCHANT_ID, CLIENT_SECRET);
+    // 2. Create order with Razorpay API
+    const razorpayAuth = Buffer
+      .from(`${KEY_ID}:${KEY_SECRET}`)
+      .toString("base64");
 
-    // 3. Prepare the payment payload
-    const paymentData = {
-      merchantOrderId: merchantOrderId,
+    const orderData = {
       amount: amount,
-      expireAfter: 300, // 5 minutes
-      metaInfo: {
-        udf1: userId,
-        udf2: "Pelviease",
+      currency: currency,
+      receipt: receipt,
+      notes: {
+        ...notes,
+        userId: userId,
       },
-      paymentFlow: {
-        type: "PG_CHECKOUT",
-        message: "Payment for your service or product",
-        merchantUrls: {
-          redirectUrl:
-            `${APP_REDIRECT_URL}?order_id=${merchantOrderId}`,
+    };
+
+    console.log(
+      "Sending request to Razorpay:",
+      JSON.stringify(orderData, null, 2)
+    );
+
+    const response = await axios.post<RazorpayOrderResponse>(
+      "https://api.razorpay.com/v1/orders",
+      orderData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Basic ${razorpayAuth}`,
         },
-      },
-    };
+      }
+    );
 
-    // 4. Make the request to PhonePe to create the payment
-    const options = {
-      method: "POST",
-      url:
-        `${PHONEPE_PROD_HOST_URL}/checkout/v2/pay`,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `O-Bearer ${accessToken}`,
-      },
-      data: paymentData,
-    };
+    console.log(
+      "Razorpay response:",
+      JSON.stringify(response.data, null, 2)
+    );
 
-    console.log("Making payment request to PhonePe...");
-    const response = await axios.request(options);
+    const razorpayOrder = response.data;
 
-    // 5. Validate PhonePe's response
-    if (!response.data?.orderId || !response.data?.redirectUrl) {
-      console.error("PhonePe API returned incomplete response:", response.data);
-      throw new Error("PhonePe did not return complete payment data");
+    // 3. Validate Razorpay response
+    if (!razorpayOrder.id) {
+      console.error("No order ID in Razorpay response:", razorpayOrder);
+      throw new Error("Razorpay did not return an order ID");
     }
 
-    const {orderId, redirectUrl, state, expireAt} = response.data;
+    // 4. Save the transaction to Firestore with the Razorpay order ID
+    const orderId = razorpayOrder.id;
 
-    // 6. Save the pending transaction to Firestore
     await admin
       .firestore()
       .collection("transactions")
-      .doc(merchantOrderId)
+      .doc(orderId)
       .set({
+        orderId: orderId,
         userId: userId,
-        amount: Number(amount),
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        receipt: razorpayOrder.receipt,
         status: "PENDING",
-        merchantOrderId: merchantOrderId,
-        phonePeOrderId: orderId,
-        state: state,
-        expireAt: expireAt,
+        razorpayOrderId: razorpayOrder.id,
+        razorpayStatus: razorpayOrder.status,
+        notes: razorpayOrder.notes,
         createdAt: Timestamp.now(),
+        razorpayCreatedAt:
+          Timestamp.fromMillis(razorpayOrder.created_at * 1000),
       });
 
-    // 7. Return the redirect URL to the client app
+    console.log(`Transaction created in Firestore with orderId: ${orderId}`);
+
+    // 5. Return the Razorpay order details to the client
     return {
-      redirectUrl: redirectUrl,
-      merchantOrderId: merchantOrderId,
+      orderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      receipt: razorpayOrder.receipt,
+      status: razorpayOrder.status,
     };
   } catch (error: unknown) {
-    console.error("Error initiating PhonePe payment:", error);
-    // Handle Axios-specific errors for better client feedback
-    if (isAxiosError(error) && error.response) {
-      console.error("Axios Error Details:", error.response.data);
+    console.error("Error creating Razorpay order:", error);
+
+    // Handle Axios-specific errors
+    if (axios.isAxiosError(error) && error.response) {
+      console.error("Razorpay API Error:", {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
+
       throw new functions.https.HttpsError(
         "internal",
-        `Payment gateway error: ${JSON.stringify(error.response.data)}`
-      );
-    }
-    // Re-throw errors from helpers or throw a generic one
-    throw error instanceof functions.https.HttpsError ?
-      error :
-      new functions.https.HttpsError(
-        "internal",
-        "An unexpected error occurred."
-      );
-  }
-});
-
-/**
- * Checks the status of a specific payment transaction.
- * Called by the client app after being redirected back from PhonePe.
- */
-export const checkPaymentStatus = functions.https.onCall({
-  secrets: [phonePeMerchantId, phonePeClientId, phonePeClientSecret],
-}, async (request: CallableRequest<StatusCheckRequestData>) => {
-  console.log("=== checkPaymentStatus function called ===");
-  console.log(
-    "Request data:",
-    JSON.stringify(request.data, null, 2)
-  );
-  console.log("Req auth:", request.auth ? {uid: request.auth.uid} : "No auth");
-
-  // Get secret values
-  const MERCHANT_ID = phonePeMerchantId.value();
-  // const CLIENT_ID = phonePeClientId.value();
-  const CLIENT_SECRET = phonePeClientSecret.value();
-
-  // 1. Validate input and user authentication
-  if (!request.data?.merchantOrderId) {
-    console.error("Missing merchantOrderId in request");
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "The 'merchantOrderId' is required."
-    );
-  }
-  if (!request.auth) {
-    console.error("No authentication provided");
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "You must be logged in to check a payment."
-    );
-  }
-
-  const {merchantOrderId} = request.data;
-  const userId = request.auth.uid;
-
-  console.log(
-    "Processing payment status check for"+
-    ` merchantOrderId: ${merchantOrderId}, ` +
-    `userId: ${userId}`
-  );
-
-  try {
-    // 2. Verify that the transaction exists and belongs to the user
-    const transactionRef = admin
-      .firestore()
-      .collection("transactions")
-      .doc(merchantOrderId);
-    const transactionDoc = await transactionRef.get();
-
-    if (!transactionDoc.exists) {
-      throw new functions.https.HttpsError(
-        "not-found",
-        "Transaction not found."
-      );
-    }
-    if (transactionDoc.data()?.userId !== userId) {
-      throw new functions.https.HttpsError(
-        "permission-denied",
-        "You are not authorized to view this transaction."
+        `Razorpay API error: ${JSON.stringify(error.response.data)}`
       );
     }
 
-    // 3. Get a new access token and check the status with PhonePe
-    const accessToken = await getPhonePeAccessToken(
-      MERCHANT_ID,
-      CLIENT_SECRET
-    );
-    const statusResponse = await checkPhonePeOrderStatus(
-      merchantOrderId,
-      accessToken
-    );
-
-    console.log(
-      "Payment Status Response:",
-      JSON.stringify(statusResponse, null, 2)
-    );
-
-    // Keep original status unless changed
-    let finalStatus = transactionDoc.data()?.status;
-
-    // 4. Update the transaction status in Firestore if it has changed
-    // Check for various success states that PhonePe might return
-    const successStates = ["SUCCESS", "COMPLETED", "PAID"];
-    const failureStates = ["FAILED", "CANCELLED", "EXPIRED", "TIMEOUT"];
-
-    if (statusResponse.state) {
-      console.log(`Current state from PhonePe: ${statusResponse.state}`);
-
-      if (successStates.includes(statusResponse.state.toUpperCase())) {
-        finalStatus = "SUCCESS";
-        console.log("Payment marked as SUCCESS");
-      } else if (failureStates.includes(statusResponse.state.toUpperCase())) {
-        finalStatus = "FAILED";
-        console.log("Payment marked as FAILED");
-      } else if (statusResponse.state.toUpperCase() === "PENDING") {
-        finalStatus = "PENDING";
-        console.log("Payment still PENDING");
-      } else {
-        console.log(`Unknown payment state: ${statusResponse.state}`);
-      }
-
-      // Update Firestore with the latest status
-      await transactionRef.update({
-        status: finalStatus,
-        finalState: statusResponse.state,
-        latestStatusCheck: statusResponse,
-        lastStatusCheckAt:
-          admin.firestore.Timestamp.now(),
-      });
-    } else {
-      console.log("No state returned from PhonePe API");
-      // Just log the check without changing the primary status
-      await transactionRef.update({
-        latestStatusCheck: statusResponse,
-        lastStatusCheckAt:
-          admin.firestore.Timestamp.now(),
-      });
-    }
-
-    // 5. Return the latest status to the client
-    const result = {
-      merchantOrderId: merchantOrderId,
-      status: finalStatus,
-      // e.g., "SUCCESS", "FAILED", "PENDING"
-      phonePeDetails: statusResponse,
-    };
-
-    console.log("=== Returning result ===");
-    console.log(
-      "Result:",
-      JSON.stringify(result, null, 2)
-    );
-
-    return result;
-  } catch (error: unknown) {
-    console.error("Error checking payment status:", error);
     // Re-throw known errors or create a generic one
     throw error instanceof functions.https.HttpsError ?
       error :
       new functions.https.HttpsError(
         "internal",
-        "Failed to check payment status."
+        "Failed to create Razorpay order."
       );
   }
 });

@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
 
 import 'dart:js_util';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pelviease_website/const/razorpay_config.dart';
@@ -12,6 +12,7 @@ import 'package:pelviease_website/screens/orders/payments/razorpay_web.dart';
 class PaymentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
   /// Initiates a Razorpay payment.
   ///
@@ -67,49 +68,68 @@ class PaymentService {
     }
 
     try {
-      // Step 1: Generate orderId
-      // final generatedOrderId = orderId ??
-      //     'PELVIEASE-${DateTime.now().millisecondsSinceEpoch}-${currentUser.uid.substring(0, 4)}';
+      // Step 1: Call Cloud Function to create Razorpay order
+      if (kDebugMode) {
+        print('📞 Calling Cloud Function to create Razorpay order...');
+      }
 
-      final generatedOrderId = generateOrderId(currentUser.uid);
-      // Step 2: Create transaction document in Firebase with PENDING status
-      final transactionRef =
-          _firestore.collection('transactions').doc(generatedOrderId);
+      final HttpsCallable callable =
+          _functions.httpsCallable('createRazorpayOrder');
 
-      final transactionData = {
-        'userId': currentUser.uid,
-        'orderId': generatedOrderId, // Store orderId reference
+      final result = await callable.call<Map<String, dynamic>>({
         'amount': amountInPaise,
-        'status': 'PENDING',
-        'paymentGateway': 'razorpay',
         'currency': RazorpayConfig.currency,
-        'createdAt': FieldValue.serverTimestamp(),
-        if (metaInfo != null) 'metaInfo': metaInfo,
+        'receipt': 'receipt_${DateTime.now().millisecondsSinceEpoch}',
+        'notes': {
+          if (metaInfo != null)
+            ...metaInfo.map((k, v) => MapEntry(k, v.toString())),
+          if (userName != null) 'userName': userName,
+          if (userEmail != null) 'userEmail': userEmail,
+          if (userPhone != null) 'userPhone': userPhone,
+        },
+      });
+
+      // Extract the Razorpay order ID from the response
+      final razorpayOrderId = result.data['orderId'] as String;
+
+      if (kDebugMode) {
+        print('✅ Razorpay order created successfully');
+        print('Order ID: $razorpayOrderId');
+      }
+
+      // Step 2: Update transaction in Firebase (already created by Cloud Function)
+      // Add any additional data not stored by Cloud Function
+      final transactionRef =
+          _firestore.collection('transactions').doc(razorpayOrderId);
+
+      // Only update if there's data to add
+      final additionalData = <String, dynamic>{
+        if (orderData != null) 'orderData': orderData,
         if (userEmail != null) 'userEmail': userEmail,
         if (userName != null) 'userName': userName,
         if (userPhone != null) 'userPhone': userPhone,
-        if (orderData != null)
-          'orderData': orderData, // Store order data for later
       };
 
-      await transactionRef.set(transactionData);
+      if (additionalData.isNotEmpty) {
+        await transactionRef.update(additionalData);
+      }
 
       if (kDebugMode) {
         print(
-            '📝 Transaction created in Firebase with orderId: $generatedOrderId');
+            '📝 Transaction updated in Firebase with orderId: $razorpayOrderId');
       }
 
-      // Step 3: Prepare Razorpay options
+      // Step 3: Prepare Razorpay options with the order_id from backend
       final options = RazorpayOptions(
         key: RazorpayConfig.keyId,
         amount: amountInPaise.toString(),
         currency: RazorpayConfig.currency,
         name: RazorpayConfig.companyName,
-        description: 'Order #$generatedOrderId',
+        description: 'Order #$razorpayOrderId',
         image: RazorpayConfig.companyLogo,
-        order_id: null,
+        order_id: razorpayOrderId, // Use the Razorpay order ID from backend
         handler: allowInterop((response) {
-          _handlePaymentSuccess(response, generatedOrderId, onSuccess);
+          _handlePaymentSuccess(response, razorpayOrderId, onSuccess);
         }),
         prefill: jsify({
           'name': userName ?? currentUser.displayName ?? '',
@@ -122,7 +142,7 @@ class PaymentService {
         }),
         modal: jsify({
           'ondismiss': allowInterop(() {
-            _handlePaymentDismissed(generatedOrderId, onDismissed);
+            _handlePaymentDismissed(razorpayOrderId, onDismissed);
           }),
         }),
       );
@@ -131,7 +151,7 @@ class PaymentService {
       final razorpay = Razorpay(options);
 
       razorpay.on('payment.failed', allowInterop((errorResponse) {
-        _handlePaymentFailure(errorResponse, generatedOrderId, onFailure);
+        _handlePaymentFailure(errorResponse, razorpayOrderId, onFailure);
       }));
 
       // Step 5: Open Razorpay checkout
@@ -141,35 +161,13 @@ class PaymentService {
         print('💳 Razorpay checkout opened');
       }
 
-      return generatedOrderId;
+      return razorpayOrderId;
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error initiating payment: $e');
       }
       rethrow;
     }
-  }
-
-  ///Generate a unique order ID
-  ///
-  /// - [currentUser]: The current authenticated user
-  String generateOrderId(String uid) {
-    final prefix = 'PELVIEASE';
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final uidPart = uid.substring(0, 6);
-
-    final buffer = StringBuffer();
-
-    // Mix characters: take one from timestamp, then one from uidPart, repeatedly
-    final maxLength =
-        timestamp.length > uidPart.length ? timestamp.length : uidPart.length;
-
-    for (int i = 0; i < maxLength; i++) {
-      if (i < timestamp.length) buffer.write(timestamp[i]);
-      if (i < uidPart.length) buffer.write(uidPart[i]);
-    }
-
-    return '$prefix-${buffer.toString()}';
   }
 
   /// Handles successful payment
