@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/widgets/footer.dart';
@@ -393,10 +394,14 @@ class AboutUsScreen extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          'images/skull.jpg',
+        child: CachedNetworkImage(
+          imageUrl:
+              'https://firebasestorage.googleapis.com/v0/b/pelviease-website.firebasestorage.app/o/const%2Fskull.jpg?alt=media&token=cb7ac5b4-6217-4184-b844-29dac62d3779',
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
+          placeholder: (context, url) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          errorWidget: (context, error, stackTrace) {
             return Container(
               color: const Color(0xFFFF0049).withOpacity(0.2),
               child: Icon(
@@ -443,7 +448,8 @@ class AboutUsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         image: const DecorationImage(
-          image: AssetImage('images/techaro.jpg'),
+          image: NetworkImage(
+              'https://firebasestorage.googleapis.com/v0/b/pelviease-website.firebasestorage.app/o/const%2Ftecharo_aboutus.jpg?alt=media&token=c7181e5b-8f4c-4e04-a783-ac421ddc4eb2'),
           fit: BoxFit.cover,
         ),
       ),
