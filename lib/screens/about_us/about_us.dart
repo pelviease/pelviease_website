@@ -394,7 +394,7 @@ class AboutUsScreen extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Image.asset(
-          'assets/aboutus_images/pelviease.png',
+          'images/skull.jpg',
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return Container(
@@ -443,7 +443,7 @@ class AboutUsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         image: const DecorationImage(
-          image: AssetImage('assets/aboutus_images/techaro.png'),
+          image: AssetImage('images/techaro.jpg'),
           fit: BoxFit.cover,
         ),
       ),

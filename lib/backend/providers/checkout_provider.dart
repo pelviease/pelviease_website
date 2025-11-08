@@ -3,6 +3,7 @@ import 'package:pelviease_website/backend/firebase_services/checkout_service.dar
 import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/order_item_model.dart';
 import 'package:pelviease_website/const/enums/payment_enum.dart';
+import 'package:pelviease_website/const/pricing_constants.dart';
 import 'package:uuid/uuid.dart';
 
 class CheckoutProvider with ChangeNotifier {
@@ -101,8 +102,8 @@ class CheckoutProvider with ChangeNotifier {
         0.0,
         (sum, item) => sum + (item.price * item.quantity),
       );
-      const taxRate = 0.1;
-      const shippingCost = 5.0;
+      final taxRate = PricingConstants.taxRate;
+      final shippingCost = PricingConstants.shippingCharges;
       final tax = subtotal * taxRate;
       final total = subtotal + tax + shippingCost - discount;
 

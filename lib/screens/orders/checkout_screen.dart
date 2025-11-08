@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/models/order_item_model.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
+import 'package:pelviease_website/const/pricing_constants.dart';
 import 'package:pelviease_website/const/toaster.dart';
 import 'package:provider/provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
@@ -50,11 +51,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
   late List<CheckoutItem> _checkoutItems;
+  bool _isProcessingPayment = false;
 
   @override
   void initState() {
     super.initState();
     Provider.of<CheckoutProvider>(context, listen: false).fetchAddresses();
+    // Reset processing state when screen initializes
+    _isProcessingPayment = false;
+  }
+
+  @override
+  void dispose() {
+    // Reset processing state when leaving screen
+    _isProcessingPayment = false;
+    super.dispose();
   }
 
   @override
@@ -80,13 +91,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _calculateShipping(List<CheckoutItem> items) {
-    // Match CheckoutProvider logic: fixed $5.0 shipping
-    return items.any((item) => item.isCheckedOut) ? 5.0 : 0.0;
+    // Match CheckoutProvider logic: fixed ₹50.0 shipping
+    return items.any((item) => item.isCheckedOut)
+        ? PricingConstants.shippingCharges
+        : 0.0;
   }
 
   double _calculateTax(List<CheckoutItem> items) {
-    // Match CheckoutProvider logic: 10% tax on subtotal
-    return _calculateSubtotal(items) * 0.1;
+    // Match CheckoutProvider logic: 5% tax on subtotal
+    return _calculateSubtotal(items) * PricingConstants.taxRate;
   }
 
   double _calculateDiscount(CartProvider cartProvider) {
@@ -474,7 +487,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     'Subtotal', _calculateSubtotal(_checkoutItems)),
                 _buildSummaryRow(
                     'Shipping', _calculateShipping(_checkoutItems)),
-                _buildSummaryRow('Tax', _calculateTax(_checkoutItems)),
+                _buildSummaryRow(
+                    'Tax (${PricingConstants.taxPercentageDisplay})',
+                    _calculateTax(_checkoutItems)),
                 _buildSummaryRow('Discount', -_calculateDiscount(cartProvider)),
                 const Divider(height: 24),
                 _buildSummaryRow(
@@ -517,31 +532,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   IconData _getPaymentIcon(PaymentType type) {
     switch (type) {
-      case PaymentType.creditCard:
-        return Icons.credit_card;
-      case PaymentType.debitCard:
-        return Icons.payment;
-      case PaymentType.bankTransfer:
-        return Icons.account_balance_wallet;
+      // case PaymentType.creditCard:
+      //   return Icons.credit_card;
+      // case PaymentType.debitCard:
+      //   return Icons.payment;
+      // case PaymentType.bankTransfer:
+      //   return Icons.account_balance_wallet;
       case PaymentType.cash:
         return Icons.money;
-      case PaymentType.upi:
+      // case PaymentType.upi:
+      //   return Icons.qr_code;
+      case PaymentType.online:
         return Icons.qr_code;
     }
   }
 
   String _getPaymentDisplayName(PaymentType type) {
     switch (type) {
-      case PaymentType.creditCard:
-        return 'Credit Card';
-      case PaymentType.debitCard:
-        return 'Debit Card';
-      case PaymentType.bankTransfer:
-        return 'Bank Transfer';
+      // case PaymentType.creditCard:
+      //   return 'Credit Card';
+      // case PaymentType.debitCard:
+      //   return 'Debit Card';
+      // case PaymentType.bankTransfer:
+      // return 'Bank Transfer';
       case PaymentType.cash:
         return 'Cash on Delivery';
-      case PaymentType.upi:
-        return 'UPI Payment';
+      // case PaymentType.upi:
+      //   return 'UPI Payment';
+      case PaymentType.online:
+        return 'Online Payment';
     }
   }
 
@@ -551,144 +570,190 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final checkoutProvider = Provider.of<CheckoutProvider>(context);
     final size = MediaQuery.of(context).size;
     bool isMobile = size.width < 600;
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: checkoutProvider.isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: primaryColor),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Processing your order...',
-                    style: TextStyle(color: textSecondaryColor),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!isMobile)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                  flex: 2,
-                                  child: _buildDeliveryAddressSection(
-                                      checkoutProvider)),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                  flex: 1,
-                                  child: _buildPaymentMethodSection(
-                                      checkoutProvider)),
-                            ],
-                          ),
-                        if (isMobile) ...[
-                          _buildDeliveryAddressSection(checkoutProvider),
-                          const SizedBox(height: 16),
-                          _buildPaymentMethodSection(checkoutProvider),
-                        ],
-                        const SizedBox(height: 20),
-                        _buildOrderSummarySection(cartProvider),
-                        // Error Message
-                        if (checkoutProvider.errorMessage != null)
-                          Container(
-                            margin: const EdgeInsets.only(top: 16),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.error, color: Colors.red.shade600),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    checkoutProvider.errorMessage!,
-                                    style: TextStyle(
-                                      color: Colors.red.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 100), // Space for bottom button
-                      ],
-                    ),
-                  ),
-                ),
-                // Bottom Place Order Button
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, -2),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: backgroundColor,
+          body: checkoutProvider.isLoading
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(color: primaryColor),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Processing your order...',
+                        style: TextStyle(color: textSecondaryColor),
                       ),
                     ],
                   ),
-                  child: SafeArea(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: isMobile
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    context.go("/delivery-policy");
-                                  },
-                                  child: Text("Delivery Policy",
-                                      style: TextStyle(
-                                        color: textPrimaryColor,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      )),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!isMobile)
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                      flex: 2,
+                                      child: _buildDeliveryAddressSection(
+                                          checkoutProvider)),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                      flex: 1,
+                                      child: _buildPaymentMethodSection(
+                                          checkoutProvider)),
+                                ],
+                              ),
+                            if (isMobile) ...[
+                              _buildDeliveryAddressSection(checkoutProvider),
+                              const SizedBox(height: 16),
+                              _buildPaymentMethodSection(checkoutProvider),
+                            ],
+                            const SizedBox(height: 20),
+                            _buildOrderSummarySection(cartProvider),
+                            // Error Message
+                            if (checkoutProvider.errorMessage != null)
+                              Container(
+                                margin: const EdgeInsets.only(top: 16),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border:
+                                      Border.all(color: Colors.red.shade200),
                                 ),
-                                SizedBox(height: 8),
-                                placeOrderButton(
-                                    checkoutProvider, context, cartProvider),
-                              ],
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    context.go("/delivery-policy");
-                                  },
-                                  child: Text("Delivery Policy",
-                                      style: TextStyle(
-                                        color: textPrimaryColor,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      )),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.error,
+                                        color: Colors.red.shade600),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        checkoutProvider.errorMessage!,
+                                        style: TextStyle(
+                                          color: Colors.red.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                placeOrderButton(
-                                    checkoutProvider, context, cartProvider),
-                              ],
-                            ),
+                              ),
+                            const SizedBox(
+                                height: 100), // Space for bottom button
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    // Bottom Place Order Button
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: SafeArea(
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: isMobile
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        context.go("/delivery-policy");
+                                      },
+                                      child: Text("Delivery Policy",
+                                          style: TextStyle(
+                                            color: textPrimaryColor,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          )),
+                                    ),
+                                    SizedBox(height: 8),
+                                    placeOrderButton(checkoutProvider, context,
+                                        cartProvider),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        context.go("/delivery-policy");
+                                      },
+                                      child: Text("Delivery Policy",
+                                          style: TextStyle(
+                                            color: textPrimaryColor,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          )),
+                                    ),
+                                    placeOrderButton(checkoutProvider, context,
+                                        cartProvider),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+        ),
+        // Payment Processing Overlay
+        if (_isProcessingPayment)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: primaryColor),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Processing Payment...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Please wait',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: textSecondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+          ),
+      ],
     );
   }
 
@@ -771,6 +836,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               } else {
                 // Online Payment - Go through payment gateway
                 try {
+                  // Show loading indicator
+                  setState(() {
+                    _isProcessingPayment = true;
+                  });
+
                   final paymentService = PaymentService();
 
                   // Store order data before payment
@@ -784,7 +854,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   // Initiate payment with callbacks
                   await paymentService.initiatePayment(
-                    amountInPaise: amountInPaise - 500,
+                    amountInPaise: amountInPaise,
                     onSuccess: (orderId, paymentId) async {
                       // Payment successful - place the order
                       try {
@@ -807,6 +877,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           // Clear stored payment data
                           PaymentOrderData.instance.clear();
 
+                          // Hide loading indicator
+                          if (mounted) {
+                            setState(() {
+                              _isProcessingPayment = false;
+                            });
+                          }
+
                           showCustomToast(
                             title: "Payment Successful",
                             description:
@@ -817,6 +894,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           // Navigate to orders page
                           context.go("/orders");
                         } else {
+                          // Hide loading indicator
+                          if (mounted) {
+                            setState(() {
+                              _isProcessingPayment = false;
+                            });
+                          }
+
                           showCustomToast(
                             title: "Order Failed",
                             description:
@@ -825,6 +909,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           );
                         }
                       } catch (e) {
+                        // Hide loading indicator
+                        if (mounted) {
+                          setState(() {
+                            _isProcessingPayment = false;
+                          });
+                        }
+
                         showCustomToast(
                           title: "Order Failed",
                           description: "Failed to place order: ${e.toString()}",
@@ -835,6 +926,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     onFailure: (orderId, errorMessage) {
                       // Payment failed
                       PaymentOrderData.instance.clear();
+
+                      // Hide loading indicator
+                      if (mounted) {
+                        setState(() {
+                          _isProcessingPayment = false;
+                        });
+                      }
+
                       showCustomToast(
                         title: "Payment Failed",
                         description: errorMessage,
@@ -844,6 +943,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     onDismissed: (orderId) {
                       // Payment cancelled by user
                       PaymentOrderData.instance.clear();
+
+                      // Hide loading indicator
+                      if (mounted) {
+                        setState(() {
+                          _isProcessingPayment = false;
+                        });
+                      }
+
                       showCustomToast(
                         title: "Payment Cancelled",
                         description: "You cancelled the payment",
@@ -851,8 +958,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       );
                     },
                   );
+
+                  // Safety: Hide loading indicator after payment flow completes
+                  // This handles cases where callbacks might not fire
+                  if (mounted) {
+                    setState(() {
+                      _isProcessingPayment = false;
+                    });
+                  }
                 } catch (e) {
                   PaymentOrderData.instance.clear();
+
+                  // Hide loading indicator
+                  if (mounted) {
+                    setState(() {
+                      _isProcessingPayment = false;
+                    });
+                  }
+
                   showCustomToast(
                     title: "Payment Failed",
                     description: "Failed to initiate payment: ${e.toString()}",

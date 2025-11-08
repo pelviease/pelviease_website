@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/const/theme.dart';
+import 'package:pelviease_website/screens/home/widgets/hero_card_two.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:pelviease_website/screens/home/widgets/blogs_section.dart';
@@ -29,9 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> carouselCards = [
     HeroCardOne(),
-    HeroCardOne(),
-    HeroCardOne(),
-    HeroCardOne(),
+    HeroCardTwo(),
+    // HeroCardOne(),
+    // HeroCardOne(),
   ];
 
   @override
@@ -42,8 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
       if (!controller.hasClients) return;
-      int nextPage = (controller.page?.round() ?? 0) + 1;
-      if (nextPage >= carouselCards.length) nextPage = 0;
+
+      // Get current page, default to 0 if null
+      int currentPage = controller.page?.round() ?? 0;
+      int nextPage = currentPage + 1;
+
+      // Instead of resetting to 0, just increment
+      // The PageView.builder with modulo will handle the infinite loop
       controller.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 1000),
@@ -136,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             curve: Curves.easeInOut,
             height: isMobile ? 140 : 180,
             width: _isFollowUsExpanded
-                ? (isMobile ? 200 : 280)
+                ? (isMobile ? 240 : 320)
                 : (isMobile ? 48 : 72),
             decoration: BoxDecoration(
               // gradient: const LinearGradient(
@@ -256,6 +262,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }, isMobile),
               _buildSocialIcon('assets/icons/youtube.png', 'YouTube', () {
                 _launchURL('https://www.youtube.com/@pelviease');
+              }, isMobile),
+              _buildSocialIcon('icons/whatsapp.png', 'WhatsApp', () {
+                _launchURL('https://wa.me/+919059721427');
               }, isMobile),
             ],
           ),

@@ -141,7 +141,7 @@ class PaymentService {
           'color': RazorpayConfig.themeColor,
         }),
         modal: jsify({
-          'ondismiss': allowInterop(() {
+          'ondismiss': allowInterop((response) {
             _handlePaymentDismissed(razorpayOrderId, onDismissed);
           }),
         }),

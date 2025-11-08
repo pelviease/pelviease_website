@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
 import 'package:pelviease_website/backend/providers/auth_provider.dart';
 import 'package:pelviease_website/backend/providers/cart_provider.dart';
+import 'package:pelviease_website/const/pricing_constants.dart';
 import 'package:pelviease_website/const/theme.dart';
 import 'package:pelviease_website/const/toaster.dart';
 import 'package:pelviease_website/screens/cart/widgets/empty_cart.dart';
@@ -519,6 +520,9 @@ class CartScreen extends StatelessWidget {
             SizedBox(height: 12),
             _buildSummaryRow(
                 'Shipping', '₹ ${cartProvider.shipping.toStringAsFixed(2)}'),
+            SizedBox(height: 12),
+            _buildSummaryRow('Tax (${PricingConstants.taxPercentageDisplay})',
+                '₹ ${cartProvider.tax.toStringAsFixed(2)}'),
             SizedBox(height: 12),
             // _buildSummaryRow('Coupon Discount',
             //     '-₹ ${cartProvider.couponDiscount.toStringAsFixed(2)}'),

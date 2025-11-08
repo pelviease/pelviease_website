@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pelviease_website/backend/firebase_services/cart_service.dart';
 import 'package:pelviease_website/backend/models/cart_model.dart';
+import 'package:pelviease_website/const/pricing_constants.dart';
 
 class CartProvider with ChangeNotifier {
   final CartService _cartService = CartService();
@@ -17,9 +18,11 @@ class CartProvider with ChangeNotifier {
 
   double get subtotal =>
       _cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
-  double get shipping => 0.00;
+  double get shipping =>
+      _cartItems.isNotEmpty ? PricingConstants.shippingCharges : 0.00;
+  double get tax => subtotal * PricingConstants.taxRate;
   double get discount => 0.00;
-  double get total => subtotal + shipping - discount;
+  double get total => subtotal + shipping + tax - discount;
   int get itemCount => _cartItems.fold(0, (sum, item) => sum + item.quantity);
 
   // Fetch cart items

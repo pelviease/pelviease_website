@@ -86,7 +86,7 @@ class ContactScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'H.NO. 7-1-302/45/4, 5th Floor B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
+                      'H.NO. 7-1-302/45/4, 5th Floor, B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ),
@@ -230,7 +230,7 @@ class ContactScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'H.NO. 7-1-302/45/4, 5th Floor B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
+                              'H.NO. 7-1-302/45/4, 5th Floor, B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 16),
                             ),

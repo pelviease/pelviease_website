@@ -115,7 +115,7 @@ class _FooterSectionState extends State<FooterSection> {
             SizedBox(width: isMobile ? 6 : 8),
             Expanded(
               child: Text(
-                'H.NO. 7-1-302/45/4, 5th Floor B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
+                'H.NO. 7-1-302/45/4, 5th Floor, B.K Guda, Sanjeev Reddy Nagar,\nAmeerpet, Hyderabad-500038, Telangana.',
                 style: TextStyle(
                   color: textColor,
                   fontSize: isMobile
